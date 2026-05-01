@@ -84,7 +84,7 @@ export default function AdminReportCards() {
                                     <div className="font-bold text-brand-950 border-t border-slate-300 pt-1">{preview.homeroom}</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-slate-600">Pemalang, 15 Juni 2025<br />Kepala Madrasah</div>
+                                    <div className="text-slate-600">Garut, 15 Juni 2025<br />Kepala Madrasah</div>
                                     <div className="h-16" />
                                     <div className="font-bold text-brand-950 border-t border-slate-300 pt-1">Ahmad Fauzi, M.Pd</div>
                                 </div>
