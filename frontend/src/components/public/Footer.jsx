@@ -65,7 +65,7 @@ export default function Footer() {
                     <span className="inline-flex items-center gap-1.5">
                         Dibangun dengan ikhlas oleh
                         <a href="#" className="font-display font-bold text-brand-200 hover:text-white tracking-tight transition-colors" data-testid="footer-rddev-credit">
-                            RdDev<span className="text-brand-400">.</span>
+                            RdDev.<span className="text-brand-400">.</span>
                         </a>
                     </span>
                 </div>
