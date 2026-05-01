@@ -1,0 +1,55 @@
+# IDE / Editor
+.idea/
+.vscode/
+
+# Node
+**/node_modules/
+**/.pnp
+**/.pnp.js
+**/coverage/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/.pnpm-debug.log*
+
+# Builds / caches
+**/build/
+**/dist/
+**/.cache/
+
+# Laravel
+backend/vendor/
+backend/storage/*.key
+backend/public/hot
+backend/public/storage
+backend/public/build
+backend/.phpunit.result.cache
+backend/.phpunit.cache/
+
+# Environment (do NOT commit secrets)
+.env
+.env.*
+*.env
+!.env.example
+!**/.env.example
+
+# Keys / creds (do NOT commit)
+*token.json*
+*credentials.json*
+credentials.json
+*.pem
+*.key
+.credentials
+
+# OS / system
+.DS_Store
+.gitconfig
+
+# Archives / large assets
+**/*.zip
+**/*.tar.gz
+**/*.tar
+**/*.tgz
+
+# Repo-specific
+memory/test_credentials.md
