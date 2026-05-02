@@ -4,11 +4,13 @@ import { PageHeader } from "../../components/shared/Primitives";
 import { teachers } from "../../data/mockData";
 import { toast } from "sonner";
 import { useRecordType } from "../../hooks/useRecordType";
+import { apiCreateRecordMultipart } from "../../lib/backend";
 
 export default function AdminTeachers() {
-    const { items, createItem, updateItem, deleteItem, hasToken } = useRecordType("teachers", teachers);
+    const { items, setItems, updateItem, deleteItem, hasToken } = useRecordType("teachers", teachers);
     const [editor, setEditor] = useState(null);
     const [form, setForm] = useState({ name: "", subject: "", photo: "", bio: "", education: "", contact: "", slug: "", is_featured: false });
+    const [photoFile, setPhotoFile] = useState(null);
 
     const slugify = (s) => (s || "").toString().toLowerCase().trim()
         .replace(/[^a-z0-9\s-]/g, "")
@@ -17,6 +19,7 @@ export default function AdminTeachers() {
 
     const openCreate = () => {
         setForm({ name: "", subject: "", photo: "", bio: "", education: "", contact: "", slug: "", is_featured: false });
+        setPhotoFile(null);
         setEditor({ mode: "create" });
     };
     const openEdit = (t) => {
@@ -30,6 +33,7 @@ export default function AdminTeachers() {
             slug: t.slug || "",
             is_featured: !!t.is_featured,
         });
+        setPhotoFile(null);
         setEditor({ mode: "edit", item: t });
     };
 
@@ -39,7 +43,6 @@ export default function AdminTeachers() {
             const payload = {
                 name: form.name,
                 subject: form.subject,
-                photo: form.photo,
                 bio: form.bio,
                 education: form.education,
                 contact: form.contact,
@@ -48,7 +51,9 @@ export default function AdminTeachers() {
             };
 
             if (editor.mode === "create") {
-                await createItem(payload);
+                if (!photoFile) { toast.error("Silakan pilih foto guru"); return; }
+                const created = await apiCreateRecordMultipart("teachers", payload, photoFile);
+                setItems((prev) => [created, ...(prev || [])]);
                 toast.success("Profil guru dibuat");
                 setEditor(null);
                 return;
@@ -56,7 +61,7 @@ export default function AdminTeachers() {
 
             const it = editor.item;
             if (typeof it?.id !== "string") { toast.error("Item demo tidak bisa diubah. Buat entri baru untuk menyimpan ke backend."); return; }
-            await updateItem(it.id, payload);
+            await updateItem(it.id, { ...payload, photo: form.photo });
             toast.success("Profil guru diperbarui");
             setEditor(null);
         } catch (err) {
@@ -110,7 +115,14 @@ export default function AdminTeachers() {
                                 <div><label className="text-sm font-semibold text-brand-950">Nama</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
                                 <div><label className="text-sm font-semibold text-brand-950">Mapel</label><input value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
                             </div>
-                            <div><label className="text-sm font-semibold text-brand-950">Foto URL</label><input value={form.photo} onChange={e => setForm({ ...form, photo: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
+                            {editor.mode === "create" ? (
+                                <div>
+                                    <label className="text-sm font-semibold text-brand-950">Foto</label>
+                                    <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 bg-white" />
+                                </div>
+                            ) : (
+                                <div><label className="text-sm font-semibold text-brand-950">Foto URL</label><input value={form.photo} onChange={e => setForm({ ...form, photo: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
+                            )}
                             <div><label className="text-sm font-semibold text-brand-950">Bio</label><textarea rows={3} value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 resize-none" /></div>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div><label className="text-sm font-semibold text-brand-950">Pendidikan</label><input value={form.education} onChange={e => setForm({ ...form, education: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>

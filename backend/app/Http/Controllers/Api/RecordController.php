@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Record;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RecordController extends Controller
 {
@@ -35,12 +36,27 @@ class RecordController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', 'string', 'max:64'],
-            'data' => ['required', 'array'],
+            'data' => ['required'],
+            'photo' => ['nullable', 'file', 'image', 'max:5120'],
         ]);
+
+        $data = $validated['data'];
+        if (is_string($data)) {
+            $data = json_decode($data, true);
+        }
+        if (!is_array($data)) {
+            return response()->json(['message' => 'Field data harus berupa object'], 422);
+        }
+
+        $photo = $request->file('photo');
+        if ($photo) {
+            $path = Storage::disk('public')->putFile('uploads/' . $validated['type'], $photo);
+            $data['photo'] = Storage::url($path);
+        }
 
         $record = Record::query()->create([
             'type' => $validated['type'],
-            'data' => $validated['data'],
+            'data' => $data,
         ]);
 
         return response()->json(array_merge(['id' => $record->id], $record->data ?? []), 201);
@@ -63,4 +79,3 @@ class RecordController extends Controller
         return response()->json(['status' => 'ok']);
     }
 }
-

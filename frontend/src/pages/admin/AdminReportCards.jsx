@@ -7,6 +7,7 @@ import { useBranding } from "../../context/BrandingContext";
 export default function AdminReportCards() {
     const { branding } = useBranding();
     const [preview, setPreview] = useState(null);
+    const firstStudent = students?.[0];
 
     const print = () => window.print();
 
@@ -49,8 +50,8 @@ export default function AdminReportCards() {
                                 <Award className="w-8 h-8 text-brand-700" />
                             </div>
                             <div className="grid grid-cols-2 gap-4 mt-5 text-sm">
-                                <div><span className="text-slate-500">Nama Siswa:</span> <span className="font-semibold text-brand-950">{students[0].name}</span></div>
-                                <div><span className="text-slate-500">NIS:</span> <span className="font-mono text-brand-950">{students[0].nis}</span></div>
+                                <div><span className="text-slate-500">Nama Siswa:</span> <span className="font-semibold text-brand-950">{firstStudent?.name || "-"}</span></div>
+                                <div><span className="text-slate-500">NIS:</span> <span className="font-mono text-brand-950">{firstStudent?.nis || "-"}</span></div>
                                 <div><span className="text-slate-500">Kelas:</span> <span className="font-semibold text-brand-950">{preview.name}</span></div>
                                 <div><span className="text-slate-500">Tahun Ajaran:</span> <span className="font-semibold text-brand-950">2024/2025 — Genap</span></div>
                             </div>

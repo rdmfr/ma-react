@@ -11,7 +11,6 @@ export const TOKEN_STORAGE_KEY = "ma_pulosari_token_v1";
 export const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
-        "Content-Type": "application/json",
         Accept: "application/json",
     },
 });
@@ -66,6 +65,15 @@ export async function apiListRecords(type, limit = 1000) {
 
 export async function apiCreateRecord(type, data) {
     const res = await api.post("/records", { type, data });
+    return res.data;
+}
+
+export async function apiCreateRecordMultipart(type, data, photoFile) {
+    const fd = new FormData();
+    fd.append("type", type);
+    fd.append("data", JSON.stringify(data || {}));
+    if (photoFile) fd.append("photo", photoFile);
+    const res = await api.post("/records", fd);
     return res.data;
 }
 

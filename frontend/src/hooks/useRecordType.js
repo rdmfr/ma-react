@@ -13,9 +13,7 @@ export function useRecordType(type, initialItems) {
         setError("");
         try {
             const list = await apiListRecords(type);
-            if (Array.isArray(list) && list.length > 0) {
-                setItems(list);
-            }
+            setItems(Array.isArray(list) ? list : []);
         } catch (e) {
             setError(e?.response?.data?.message || e.message || "Gagal memuat data");
         } finally {

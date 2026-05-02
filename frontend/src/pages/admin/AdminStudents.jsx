@@ -4,9 +4,10 @@ import { toast } from "sonner";
 import { PageHeader, StatusBadge } from "../../components/shared/Primitives";
 import { students } from "../../data/mockData";
 import { useRecordType } from "../../hooks/useRecordType";
+import { apiCreateRecordMultipart } from "../../lib/backend";
 
 export default function AdminStudents() {
-    const { items, createItem, updateItem, deleteItem, hasToken } = useRecordType("students", students);
+    const { items, setItems, updateItem, deleteItem, hasToken } = useRecordType("students", students);
     const [q, setQ] = useState("");
     const [cls, setCls] = useState("Semua");
     const [importOpen, setImportOpen] = useState(false);
@@ -14,8 +15,9 @@ export default function AdminStudents() {
     const [selected, setSelected] = useState([]);
     const [editor, setEditor] = useState(null);
     const [form, setForm] = useState({ nis: "", name: "", gender: "L", class: "", status: "Aktif", photo: "" });
+    const [photoFile, setPhotoFile] = useState(null);
 
-    const filtered = items.filter(s => (cls === "Semua" || s.class === cls) && (s.name.toLowerCase().includes(q.toLowerCase()) || s.nis.includes(q)));
+    const filtered = items.filter(s => (cls === "Semua" || s.class === cls) && (((s.name || "").toLowerCase().includes(q.toLowerCase())) || ((s.nis || "").includes(q))));
     const uniqueClasses = Array.from(new Set(items.map(s => s.class)));
     const visibleSlice = filtered.slice(0, 12);
     const allSelected = visibleSlice.length > 0 && visibleSlice.every(s => selected.includes(s.id));
@@ -23,22 +25,24 @@ export default function AdminStudents() {
     const toggleOne = (id) => setSelected(selected.includes(id) ? selected.filter(x => x !== id) : [...selected, id]);
 
     const simulateImport = () => { setImportOpen(false); setTimeout(() => { setResultOpen(true); toast.success("Import selesai: 28 berhasil, 2 gagal"); }, 800); };
-    const openCreate = () => { setForm({ nis: "", name: "", gender: "L", class: uniqueClasses[0] || "", status: "Aktif", photo: "" }); setEditor({ mode: "create" }); };
-    const openEdit = (s) => { setForm({ nis: s.nis || "", name: s.name || "", gender: s.gender || "L", class: s.class || "", status: s.status || "Aktif", photo: s.photo || "" }); setEditor({ mode: "edit", item: s }); };
+    const openCreate = () => { setForm({ nis: "", name: "", gender: "L", class: uniqueClasses[0] || "", status: "Aktif", photo: "" }); setPhotoFile(null); setEditor({ mode: "create" }); };
+    const openEdit = (s) => { setForm({ nis: s.nis || "", name: s.name || "", gender: s.gender || "L", class: s.class || "", status: s.status || "Aktif", photo: s.photo || "" }); setPhotoFile(null); setEditor({ mode: "edit", item: s }); };
 
     const save = async () => {
         if (!hasToken) { toast.error("Silakan login dulu"); return; }
         try {
-            const payload = { nis: form.nis, name: form.name, gender: form.gender, class: form.class, status: form.status, photo: form.photo };
+            const payload = { nis: form.nis, name: form.name, gender: form.gender, class: form.class, status: form.status };
             if (editor.mode === "create") {
-                await createItem(payload);
+                if (!photoFile) { toast.error("Silakan pilih foto siswa"); return; }
+                const created = await apiCreateRecordMultipart("students", payload, photoFile);
+                setItems((prev) => [created, ...(prev || [])]);
                 toast.success("Siswa berhasil ditambahkan");
                 setEditor(null);
                 return;
             }
             const it = editor.item;
             if (typeof it?.id !== "string") { toast.error("Item demo tidak bisa diubah. Buat entri baru untuk menyimpan ke backend."); return; }
-            await updateItem(it.id, payload);
+            await updateItem(it.id, { ...payload, photo: form.photo });
             toast.success("Data siswa diperbarui");
             setEditor(null);
         } catch (err) {
@@ -143,7 +147,14 @@ export default function AdminStudents() {
                                     <option value="Nonaktif">Nonaktif</option>
                                 </select>
                             </div>
-                            <div><label className="text-sm font-semibold text-brand-950">Foto URL</label><input value={form.photo} onChange={e => setForm({ ...form, photo: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
+                            {editor.mode === "create" ? (
+                                <div>
+                                    <label className="text-sm font-semibold text-brand-950">Foto</label>
+                                    <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 bg-white" />
+                                </div>
+                            ) : (
+                                <div><label className="text-sm font-semibold text-brand-950">Foto URL</label><input value={form.photo} onChange={e => setForm({ ...form, photo: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
+                            )}
                         </div>
                         <div className="mt-6 flex gap-3">
                             <button onClick={() => setEditor(null)} className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold">Batal</button>

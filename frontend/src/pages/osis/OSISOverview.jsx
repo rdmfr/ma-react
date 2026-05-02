@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function OSISOverview() {
     const { user } = useAuth();
+    const firstName = user?.name?.split(" ")?.[0] || "";
     const my = approvalQueue.filter(a => a.submittedBy.includes("OSIS"));
     const pending = my.filter(a => a.status === "pending").length;
     const approved = my.filter(a => a.status === "approved").length;
@@ -16,7 +17,7 @@ export default function OSISOverview() {
                 <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
                 <div className="relative">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/20 px-3 py-1 text-xs font-semibold mb-4"><Sparkles className="w-3 h-3" />Dashboard OSIS</div>
-                    <h1 className="font-display text-3xl lg:text-4xl font-black tracking-tight">Halo, <span className="font-editorial italic">{user?.name?.split(" ")[0]}</span>!</h1>
+                    <h1 className="font-display text-3xl lg:text-4xl font-black tracking-tight">Halo, <span className="font-editorial italic">{firstName}</span>!</h1>
                     <p className="text-brand-100/90 mt-2">Ayo aktif kelola kegiatan & konten OSIS.</p>
                 </div>
             </div>

@@ -28,6 +28,7 @@ const programDist = [
 export default function AdminOverview() {
     const { user } = useAuth();
     const pending = approvalQueue.filter(a => a.status === "pending").length;
+    const firstName = user?.name?.split(" ")?.[0] || "";
     return (
         <div data-testid="admin-overview">
             <div className="relative overflow-hidden rounded-3xl gradient-brand text-white p-8 lg:p-10 mb-8">
@@ -35,7 +36,7 @@ export default function AdminOverview() {
                 <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
                 <div className="relative">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/20 px-3 py-1 text-xs font-semibold mb-4"><Sparkles className="w-3 h-3" /> Dashboard Administrator</div>
-                    <h1 className="font-display text-3xl lg:text-4xl font-black tracking-tight text-white">Assalamu'alaikum, <span className="font-editorial italic">{user?.name?.split(" ")[0]}</span>.</h1>
+                    <h1 className="font-display text-3xl lg:text-4xl font-black tracking-tight text-white">Assalamu'alaikum, <span className="font-editorial italic">{firstName}</span>.</h1>
                     <p className="text-brand-100/90 mt-2">Ada {pending} pengajuan konten menunggu persetujuan. Mari kita mulai.</p>
                 </div>
             </div>

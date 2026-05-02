@@ -20,7 +20,7 @@ export default function AdminUsers() {
     }, []);
 
     const filtered = useMemo(
-        () => (items || []).filter(u => u.name.toLowerCase().includes(q.toLowerCase()) || u.email.toLowerCase().includes(q.toLowerCase())),
+        () => (items || []).filter(u => (u.name || "").toLowerCase().includes(q.toLowerCase()) || (u.email || "").toLowerCase().includes(q.toLowerCase())),
         [items, q]
     );
 
