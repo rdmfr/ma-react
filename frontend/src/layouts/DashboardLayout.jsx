@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useBranding } from "../context/BrandingContext";
@@ -9,6 +9,8 @@ import {
     FileCheck, BookMarked, User as UserIcon, PanelLeftClose, PanelLeft
 } from "lucide-react";
 import { NotificationDropdown, ProfileDropdown } from "../components/dashboard/Dropdowns";
+import { initDashboardData } from "../data/mockData";
+import { useHydrationVersion } from "../hooks/useHydrationVersion";
 
 const ICONS = { LayoutDashboard, Users, GraduationCap, BookOpenText, CalendarRange, ScrollText, FileBarChart2, BookCopy, Newspaper, ShieldCheck, Inbox, Settings, Activity, Bell, ClipboardCheck, SquareGanttChart, School, Upload, UserPlus, Trophy, Images, Megaphone, FileCheck, BookMarked, UserIcon };
 
@@ -83,9 +85,34 @@ export default function DashboardLayout({ requiredRole }) {
     const location = useLocation();
     const [collapsed, setCollapsed] = useState(false);
     const [searchVal, setSearchVal] = useState("");
+    const v = useHydrationVersion("dashboard");
 
-    if (!user) return <Navigate to="/login" replace />;
-    if (requiredRole && user.role !== requiredRole) return <Navigate to={`/${user.role}`} replace />;
+    const redirectToLogin = !user;
+    const redirectToRole = !!user && !!requiredRole && user.role !== requiredRole;
+
+    useEffect(() => {
+        if (!user) return;
+        if (redirectToRole) return;
+        if (process.env.REACT_APP_USE_MOCK_DATA === "true") return;
+        let cancelled = false;
+        const refresh = async () => {
+            if (cancelled) return;
+            await initDashboardData();
+        };
+        const onVis = () => {
+            if (document.visibilityState === "visible") refresh().catch(() => {});
+        };
+        document.addEventListener("visibilitychange", onVis);
+        window.addEventListener("focus", onVis);
+        return () => {
+            cancelled = true;
+            document.removeEventListener("visibilitychange", onVis);
+            window.removeEventListener("focus", onVis);
+        };
+    }, [user, redirectToRole]);
+
+    if (redirectToLogin) return <Navigate to="/login" replace />;
+    if (redirectToRole) return <Navigate to={`/${user.role}`} replace />;
 
     const nav = ROLE_NAV[user.role] || [];
 
@@ -158,7 +185,7 @@ export default function DashboardLayout({ requiredRole }) {
                         <ProfileDropdown user={user} onLogout={onLogout} />
                     </div>
                 </header>
-                <main className="flex-1 overflow-y-auto thin-scroll p-6 lg:p-8 page-enter" data-testid="dashboard-main" key={location.pathname}>
+                <main className="flex-1 overflow-y-auto thin-scroll p-6 lg:p-8 page-enter" data-testid="dashboard-main" key={`${location.pathname}:${v}`}>
                     <Outlet />
                 </main>
             </div>

@@ -1,18 +1,32 @@
 import React, { useState } from "react";
 import { Plus, BookCopy, Download, Pencil, Trash2, X } from "lucide-react";
 import { PageHeader } from "../../components/shared/Primitives";
-import { modules } from "../../data/mockData";
+import { initPublicData, modules } from "../../data/mockData";
 import { toast } from "sonner";
 import { useRecordType } from "../../hooks/useRecordType";
+import { apiCreateRecordWithFile, apiUpdateRecordWithFile } from "../../lib/backend";
+import { apiPublicDownloadModule } from "../../lib/backend";
 
 export default function AdminModules() {
-    const { items, createItem, updateItem, deleteItem, hasToken } = useRecordType("modules", modules);
+    const { items, setItems, createItem, updateItem, deleteItem, hasToken } = useRecordType("modules", modules);
     const [editor, setEditor] = useState(null);
     const [form, setForm] = useState({ title: "", subject: "", grade: "X", fileSize: "", downloads: 0, updatedAt: "", url: "", status: "approved" });
+    const [file, setFile] = useState(null);
+
+    const formatBytes = (bytes) => {
+        const n = Number(bytes) || 0;
+        if (!n) return "";
+        const units = ["B", "KB", "MB", "GB"];
+        const i = Math.min(Math.floor(Math.log(n) / Math.log(1024)), units.length - 1);
+        const v = n / Math.pow(1024, i);
+        const fixed = i === 0 ? 0 : v < 10 ? 1 : 0;
+        return `${v.toFixed(fixed)} ${units[i]}`;
+    };
 
     const openCreate = () => {
         const today = new Date().toISOString().slice(0, 10);
         setForm({ title: "", subject: "", grade: "X", fileSize: "", downloads: 0, updatedAt: today, url: "", status: "approved" });
+        setFile(null);
         setEditor({ mode: "create" });
     };
     const openEdit = (m) => {
@@ -26,6 +40,7 @@ export default function AdminModules() {
             url: m.url || "",
             status: m.status || "approved",
         });
+        setFile(null);
         setEditor({ mode: "edit", item: m });
     };
 
@@ -36,21 +51,30 @@ export default function AdminModules() {
                 title: form.title,
                 subject: form.subject,
                 grade: form.grade,
-                fileSize: form.fileSize,
+                fileSize: form.fileSize || (file ? formatBytes(file.size) : ""),
                 downloads: Number(form.downloads) || 0,
                 updatedAt: form.updatedAt || new Date().toISOString().slice(0, 10),
                 url: form.url || "",
                 status: form.status || "approved",
             };
             if (editor.mode === "create") {
-                await createItem(payload);
+                if (!file) { toast.error("Silakan pilih file modul"); return; }
+                const created = await apiCreateRecordWithFile("modules", payload, file, "url");
+                setItems((prev) => [created, ...(prev || [])]);
+                initPublicData().catch(() => {});
                 toast.success("Modul berhasil dibuat");
                 setEditor(null);
                 return;
             }
             const it = editor.item;
             if (typeof it?.id !== "string") { toast.error("Item demo tidak bisa diubah. Buat entri baru untuk menyimpan ke backend."); return; }
-            await updateItem(it.id, payload);
+            if (file) {
+                const updated = await apiUpdateRecordWithFile(it.id, payload, file, "url");
+                setItems((prev) => (prev || []).map((x) => (x.id === it.id ? updated : x)));
+            } else {
+                await updateItem(it.id, payload);
+            }
+            initPublicData().catch(() => {});
             toast.success("Modul berhasil diperbarui");
             setEditor(null);
         } catch (err) {
@@ -81,8 +105,21 @@ export default function AdminModules() {
                                     <div className="inline-flex items-center gap-1">
                                         <button
                                             onClick={() => {
-                                                if (m.url) window.open(m.url, "_blank", "noopener,noreferrer");
-                                                else toast.error("URL file belum diisi");
+                                                if (typeof m.id !== "string") {
+                                                    if (m.url) window.open(m.url, "_blank", "noopener,noreferrer");
+                                                    else toast.error("File belum tersedia");
+                                                    return;
+                                                }
+                                                apiPublicDownloadModule(m.id)
+                                                    .then((res) => {
+                                                        setItems((prev) => (prev || []).map((x) => (x.id === m.id ? { ...x, downloads: res?.downloads ?? x.downloads } : x)));
+                                                        if (res?.url) window.open(res.url, "_blank", "noopener,noreferrer");
+                                                        else toast.error("File belum tersedia");
+                                                    })
+                                                    .catch((err) => {
+                                                        if (m.url) window.open(m.url, "_blank", "noopener,noreferrer");
+                                                        else toast.error(err?.response?.data?.message || err.message || "Gagal mengunduh");
+                                                    });
                                             }}
                                             className="w-8 h-8 rounded-lg hover:bg-brand-50 text-brand-700 flex items-center justify-center"
                                         >
@@ -93,7 +130,7 @@ export default function AdminModules() {
                                             onClick={async () => {
                                                 if (!hasToken) { toast.error("Silakan login dulu"); return; }
                                                 if (typeof m.id !== "string") { toast.error("Item demo tidak bisa dihapus"); return; }
-                                                try { await deleteItem(m.id); toast.success("Modul dihapus"); } catch (err) { toast.error(err?.response?.data?.message || err.message || "Gagal menghapus"); }
+                                                try { await deleteItem(m.id); initPublicData().catch(() => {}); toast.success("Modul dihapus"); } catch (err) { toast.error(err?.response?.data?.message || err.message || "Gagal menghapus"); }
                                             }}
                                             className="w-8 h-8 rounded-lg hover:bg-red-50 text-red-600 flex items-center justify-center"
                                         >
@@ -125,7 +162,10 @@ export default function AdminModules() {
                             </div>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div><label className="text-sm font-semibold text-brand-950">Ukuran File</label><input value={form.fileSize} onChange={e => setForm({ ...form, fileSize: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
-                                <div><label className="text-sm font-semibold text-brand-950">URL File</label><input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
+                                <div>
+                                    <label className="text-sm font-semibold text-brand-950">File Modul</label>
+                                    <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 bg-white" />
+                                </div>
                             </div>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div><label className="text-sm font-semibold text-brand-950">Unduhan</label><input type="number" value={form.downloads} onChange={e => setForm({ ...form, downloads: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>

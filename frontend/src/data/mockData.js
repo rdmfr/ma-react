@@ -2,6 +2,20 @@
 
 import { apiDashboardBootstrap, apiPublicBootstrap } from "../lib/backend";
 
+const listeners = new Set();
+
+export function subscribeDataHydrated(listener) {
+    if (typeof listener !== "function") return () => {};
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+}
+
+function emit(scope) {
+    listeners.forEach((fn) => {
+        try { fn(scope); } catch { }
+    });
+}
+
 export const stats = [
     { label: "Siswa Aktif", value: "842", icon: "Users" },
     { label: "Guru & Staff", value: "56", icon: "GraduationCap" },
@@ -237,12 +251,14 @@ export async function initPublicData() {
     if (process.env.REACT_APP_USE_MOCK_DATA === "true") return;
     const payload = await apiPublicBootstrap();
     hydrateFromBootstrap(payload);
+    emit("public");
 }
 
 export async function initDashboardData() {
     if (process.env.REACT_APP_USE_MOCK_DATA === "true") return;
     const payload = await apiDashboardBootstrap();
     hydrateFromBootstrap(payload);
+    emit("dashboard");
 }
 
 export const scores = [

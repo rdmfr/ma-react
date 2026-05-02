@@ -1,7 +1,8 @@
 import React from "react";
 import { Download } from "lucide-react";
-import { studentWorks } from "../../data/mockData";
+import { initPublicData, studentWorks } from "../../data/mockData";
 import { toast } from "sonner";
+import { apiPublicDownloadStudentWork } from "../../lib/backend";
 
 export default function KaryaSiswa() {
     const visible = studentWorks.filter((k) => !k.status || k.status === "approved");
@@ -24,9 +25,21 @@ export default function KaryaSiswa() {
                             <div className="mt-4 flex items-center justify-between">
                                 <span className="text-[11px] text-slate-500">{k.fileSize} · {k.downloads} unduhan</span>
                                 <button
-                                    onClick={() => {
-                                        if (k.url) window.open(k.url, "_blank", "noopener,noreferrer");
-                                        else toast.error("File belum tersedia");
+                                    onClick={async () => {
+                                        try {
+                                            if (!k?.id) {
+                                                if (k.url) window.open(k.url, "_blank", "noopener,noreferrer");
+                                                else toast.error("File belum tersedia");
+                                                return;
+                                            }
+                                            const res = await apiPublicDownloadStudentWork(String(k.id));
+                                            if (res?.url) window.open(res.url, "_blank", "noopener,noreferrer");
+                                            else toast.error("File belum tersedia");
+                                            initPublicData().catch(() => {});
+                                        } catch (err) {
+                                            if (k.url) window.open(k.url, "_blank", "noopener,noreferrer");
+                                            else toast.error(err?.response?.data?.message || err.message || "Gagal mengunduh");
+                                        }
                                     }}
                                     className="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-3 py-2 text-xs font-bold"
                                     data-testid={`karya-download-${k.id}`}

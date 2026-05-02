@@ -4,6 +4,7 @@ import { PageHeader } from "../../components/shared/Primitives";
 import { academicYears, classes } from "../../data/mockData";
 import { toast } from "sonner";
 import { useRecordType } from "../../hooks/useRecordType";
+import { apiAdminBulkUpdateRecords } from "../../lib/backend";
 
 export default function AdminAcademicYears() {
     const yearsApi = useRecordType("academicYears", academicYears);
@@ -30,11 +31,9 @@ export default function AdminAcademicYears() {
                                 if (!yearsApi.hasToken) return;
                                 if (typeof y.id !== "string") { toast.error("Item demo tidak bisa diubah"); return; }
                                 try {
-                                    const toUpdate = yearsApi.items.filter((it) => typeof it.id === "string");
-                                    for (const it of toUpdate) {
-                                        const next = { ...it, active: it.id === y.id };
-                                        await yearsApi.updateItem(it.id, next);
-                                    }
+                                    const toUpdate = yearsApi.items.filter((it) => typeof it.id === "string").map((it) => ({ ...it, active: it.id === y.id }));
+                                    yearsApi.setItems(toUpdate);
+                                    await apiAdminBulkUpdateRecords(toUpdate.map((it) => ({ id: it.id, data: it })));
                                     toast.success("Tahun ajaran aktif diperbarui");
                                 } catch (err) {
                                     toast.error(err?.response?.data?.message || err.message || "Gagal memperbarui");
@@ -108,10 +107,11 @@ export default function AdminAcademicYears() {
                                     try {
                                         const created = await yearsApi.createItem({ year: form.year, semester: form.semester, active: !!form.active });
                                         if (form.active && typeof created?.id === "string") {
-                                            const toUpdate = yearsApi.items.filter((it) => typeof it.id === "string" && it.id !== created.id);
-                                            for (const it of toUpdate) {
-                                                await yearsApi.updateItem(it.id, { ...it, active: false });
-                                            }
+                                            const toUpdate = yearsApi.items
+                                                .filter((it) => typeof it.id === "string")
+                                                .map((it) => it.id === created.id ? it : ({ ...it, active: false }));
+                                            yearsApi.setItems(toUpdate);
+                                            await apiAdminBulkUpdateRecords(toUpdate.map((it) => ({ id: it.id, data: it })));
                                         }
                                         toast.success("Tahun ajaran dibuat");
                                         setEditor(false);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Record;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -10,6 +11,23 @@ use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
 {
+    private function logActivity(Request $request, string $action, string $target): void
+    {
+        try {
+            $by = $request->user();
+            Record::query()->create([
+                'type' => 'activityLog',
+                'data' => [
+                    'user' => $by?->email ?? $by?->name ?? 'system',
+                    'action' => strtoupper($action),
+                    'target' => $target,
+                    'date' => now()->format('Y-m-d H:i'),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+        }
+    }
+
     public function index()
     {
         return User::query()
@@ -48,6 +66,8 @@ class AdminUserController extends Controller
             'avatar_url' => $validated['avatar_url'] ?? null,
         ]);
 
+        $this->logActivity($request, 'create', 'users/' . $user->id);
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
@@ -77,6 +97,8 @@ class AdminUserController extends Controller
 
         $user->forceFill($validated)->save();
 
+        $this->logActivity($request, 'update', 'users/' . $user->id);
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
@@ -95,7 +117,7 @@ class AdminUserController extends Controller
 
         $user->tokens()->delete();
         $user->delete();
+        $this->logActivity($request, 'delete', 'users/' . $user->id);
         return response()->json(['status' => 'ok']);
     }
 }
-

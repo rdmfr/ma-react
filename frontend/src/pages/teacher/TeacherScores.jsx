@@ -4,12 +4,23 @@ import { toast } from "sonner";
 import { PageHeader } from "../../components/shared/Primitives";
 import { students } from "../../data/mockData";
 import { apiCreateRecord, apiListRecords, apiUpdateRecord, TOKEN_STORAGE_KEY } from "../../lib/backend";
+import { useSearchParams } from "react-router-dom";
 
 export default function TeacherScores() {
+    const [searchParams] = useSearchParams();
     const [cls, setCls] = useState("X IPA 1");
     const [subject, setSubject] = useState("Matematika");
     const [semester, setSemester] = useState("Semester Genap 2024/2025");
     const [scores, setScores] = useState(students.slice(0, 10).map(s => ({ recordId: null, id: s.id, name: s.name, nis: s.nis, h1: 85, h2: 88, uts: 82, uas: 90 })));
+
+    useEffect(() => {
+        const qClass = searchParams.get("class");
+        const qSubject = searchParams.get("subject");
+        const qSemester = searchParams.get("semester");
+        if (qClass) setCls(qClass);
+        if (qSubject) setSubject(qSubject);
+        if (qSemester) setSemester(qSemester);
+    }, [searchParams]);
 
     useEffect(() => {
         const token = localStorage.getItem(TOKEN_STORAGE_KEY);
@@ -36,6 +47,25 @@ export default function TeacherScores() {
     }, [cls, subject, semester]);
 
     const update = (id, field, val) => setScores(prev => prev.map(s => s.id === id ? { ...s, [field]: Number(val) || 0 } : s));
+
+    const exportCsv = () => {
+        const header = ["NIS", "Nama", "Kelas", "Mapel", "Semester", "H1", "H2", "UTS", "UAS", "Akhir"];
+        const lines = [header.join(",")].concat((scores || []).map((r) => {
+            const final = Number((r.h1 * 0.15 + r.h2 * 0.15 + r.uts * 0.3 + r.uas * 0.4).toFixed(1));
+            const val = (x) => `"${String(x ?? "").replaceAll('"', '""')}"`;
+            return [val(r.nis), val(r.name), val(cls), val(subject), val(semester), r.h1, r.h2, r.uts, r.uas, final].join(",");
+        }));
+        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `nilai-${String(cls).replaceAll(" ", "-")}-${String(subject).replaceAll(" ", "-")}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    };
+
     const save = async () => {
         const token = localStorage.getItem(TOKEN_STORAGE_KEY);
         if (!token) { toast.error("Silakan login dulu"); return; }
@@ -61,8 +91,8 @@ export default function TeacherScores() {
 
     return (
         <div data-testid="teacher-scores">
-            <PageHeader title="Input Nilai" description="Masukkan nilai siswa langsung di tabel. Auto-save setiap perubahan." breadcrumbs={["Guru", "Nilai"]}
-                actions={<><button className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-2.5 text-sm font-bold text-brand-900"><Download className="w-4 h-4" />Export</button><button onClick={save} className="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-5 py-2.5 text-sm font-bold"><Save className="w-4 h-4" />Simpan Semua</button></>} />
+            <PageHeader title="Input Nilai" description="Masukkan nilai siswa langsung di tabel, lalu simpan." breadcrumbs={["Guru", "Nilai"]}
+                actions={<><button onClick={exportCsv} className="inline-flex items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-2.5 text-sm font-bold text-brand-900"><Download className="w-4 h-4" />Export CSV</button><button onClick={save} className="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-5 py-2.5 text-sm font-bold"><Save className="w-4 h-4" />Simpan Semua</button></>} />
             <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden">
                 <div className="p-5 border-b border-slate-100 flex gap-3 flex-wrap">
                     <select value={cls} onChange={e => setCls(e.target.value)} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm"><option>X IPA 1</option><option>XI IPA 2</option></select>

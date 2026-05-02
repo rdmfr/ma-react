@@ -7,10 +7,14 @@ import { useRecordType } from "../../hooks/useRecordType";
 
 export default function AdminMessages() {
     const { items, updateItem, deleteItem, hasToken } = useRecordType("contactMessages", contactMessages);
-    const [sel, setSel] = useState(contactMessages[0]);
+    const [sel, setSel] = useState(null);
 
     useEffect(() => {
-        if (items?.length && !sel) setSel(items[0]);
+        if (!Array.isArray(items) || items.length === 0) { setSel(null); return; }
+        if (!sel) { setSel(items[0]); return; }
+        const next = items.find((x) => x.id === sel.id);
+        if (!next) { setSel(items[0]); return; }
+        if (next !== sel) setSel(next);
     }, [items, sel]);
 
     const select = async (m) => {
@@ -19,7 +23,8 @@ export default function AdminMessages() {
         if (typeof m?.id !== "string") return;
         if (m.read) return;
         try {
-            await updateItem(m.id, { ...m, read: true });
+            const updated = await updateItem(m.id, { ...m, read: true });
+            setSel(updated);
         } catch { }
     };
     return (
@@ -48,7 +53,18 @@ export default function AdminMessages() {
                                     <div className="text-sm text-slate-600 mt-2">dari <span className="font-semibold text-brand-900">{sel.name}</span> · {sel.email}</div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button className="inline-flex items-center gap-1.5 rounded-xl gradient-brand text-white px-4 py-2 text-xs font-bold"><Reply className="w-3 h-3" />Balas</button>
+                                    <button
+                                        onClick={() => {
+                                            const to = sel.email || "";
+                                            if (!to) { toast.error("Email pengirim tidak tersedia"); return; }
+                                            const subject = `Re: ${sel.subject || "Pesan"}`;
+                                            const body = `Assalamu'alaikum,\n\n\n\nTerima kasih.\n`;
+                                            window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                        }}
+                                        className="inline-flex items-center gap-1.5 rounded-xl gradient-brand text-white px-4 py-2 text-xs font-bold"
+                                    >
+                                        <Reply className="w-3 h-3" />Balas
+                                    </button>
                                     <button
                                         onClick={async () => {
                                             if (!hasToken) { toast.error("Silakan login dulu"); return; }

@@ -3,7 +3,7 @@ import { Save, Camera, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "../../components/shared/Primitives";
 import { useAuth } from "../../context/AuthContext";
-import { apiUpdateProfile } from "../../lib/backend";
+import { apiUpdateProfile, apiUploadAvatar } from "../../lib/backend";
 
 export default function TeacherProfile() {
     const { user, updateUser } = useAuth();
@@ -12,9 +12,15 @@ export default function TeacherProfile() {
     const fileRef = useRef(null);
     const onFile = (e) => {
         const f = e.target.files?.[0]; if (!f) return;
-        const r = new FileReader();
-        r.onload = () => { setAvatar(r.result); toast.success("Foto profil diperbarui"); };
-        r.readAsDataURL(f);
+        apiUploadAvatar(f)
+            .then((updated) => {
+                updateUser(updated);
+                setAvatar(updated?.avatar);
+                toast.success("Foto profil diperbarui");
+            })
+            .catch((err) => {
+                toast.error(err?.response?.data?.message || err.message || "Gagal mengunggah foto");
+            });
     };
     return (
         <div data-testid="teacher-profile">

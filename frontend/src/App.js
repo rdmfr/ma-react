@@ -1,5 +1,5 @@
 import React from "react";
-import "@/App.css";
+import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { BrandingProvider } from "./context/BrandingContext";

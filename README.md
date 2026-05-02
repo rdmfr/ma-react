@@ -20,7 +20,7 @@ Dokumentasi tambahan:
 ## Prasyarat (Lokal)
 - XAMPP (MySQL + Apache opsional)
 - PHP 8.1+ dan Composer (untuk Laravel)
-- Node.js (untuk development/build React)
+- Node.js 18 LTS (untuk development/build React)
 
 ## Menjalankan di Lokal (XAMPP)
 

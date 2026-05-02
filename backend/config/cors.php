@@ -1,5 +1,15 @@
 <?php
 
+$env = env('APP_ENV', 'production');
+$allowedOrigins = array_values(array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,http://localhost:58380')))));
+$allowedOriginsPatterns = [];
+if ($env === 'local') {
+    $allowedOriginsPatterns = [
+        '/^http:\/\/localhost:\d+$/',
+        '/^http:\/\/127\.0\.0\.1:\d+$/',
+    ];
+}
+
 return [
 
     /*
@@ -19,9 +29,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_values(array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001'))))),
+    'allowed_origins' => $allowedOrigins,
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => $allowedOriginsPatterns,
 
     'allowed_headers' => ['*'],
 

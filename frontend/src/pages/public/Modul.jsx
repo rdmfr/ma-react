@@ -1,9 +1,10 @@
 import React from "react";
 import { Download, BookCopy, Calendar } from "lucide-react";
-import { modules } from "../../data/mockData";
+import { initPublicData, modules } from "../../data/mockData";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { toast } from "sonner";
+import { apiPublicDownloadModule } from "../../lib/backend";
 
 export default function Modul() {
     const visible = modules.filter((m) => !m.status || m.status === "approved");
@@ -28,9 +29,21 @@ export default function Modul() {
                             </div>
                         </div>
                         <button
-                            onClick={() => {
-                                if (m.url) window.open(m.url, "_blank", "noopener,noreferrer");
-                                else toast.error("File belum tersedia");
+                            onClick={async () => {
+                                try {
+                                    if (!m?.id) {
+                                        if (m.url) window.open(m.url, "_blank", "noopener,noreferrer");
+                                        else toast.error("File belum tersedia");
+                                        return;
+                                    }
+                                    const res = await apiPublicDownloadModule(String(m.id));
+                                    if (res?.url) window.open(res.url, "_blank", "noopener,noreferrer");
+                                    else toast.error("File belum tersedia");
+                                    initPublicData().catch(() => {});
+                                } catch (err) {
+                                    if (m.url) window.open(m.url, "_blank", "noopener,noreferrer");
+                                    else toast.error(err?.response?.data?.message || err.message || "Gagal mengunduh");
+                                }
                             }}
                             className="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-5 py-3 text-sm font-bold shrink-0"
                             data-testid={`modul-download-${m.id}`}

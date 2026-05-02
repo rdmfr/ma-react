@@ -2,8 +2,10 @@ import React from "react";
 import { Users, GraduationCap, BookOpenText, ClipboardCheck, TrendingUp, Activity, ArrowUpRight, Bell, Sparkles } from "lucide-react";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
 import { StatCard, PageHeader } from "../../components/shared/Primitives";
-import { approvalQueue, contactMessages, activityLog, news } from "../../data/mockData";
+import { activityLog, approvalQueue, contactMessages, news } from "../../data/mockData";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useRecordType } from "../../hooks/useRecordType";
 
 const studentTrend = [
     { m: "Sep", siswa: 780, baru: 12 },
@@ -27,7 +29,12 @@ const programDist = [
 
 export default function AdminOverview() {
     const { user } = useAuth();
-    const pending = approvalQueue.filter(a => a.status === "pending").length;
+    const navigate = useNavigate();
+    const approvals = useRecordType("approvalQueue", approvalQueue);
+    const messages = useRecordType("contactMessages", contactMessages);
+    const logs = useRecordType("activityLog", activityLog);
+    const newsStore = useRecordType("news", news);
+    const pending = (approvals.items || []).filter(a => a.status === "pending").length;
     const firstName = user?.name?.split(" ")?.[0] || "";
     return (
         <div data-testid="admin-overview">
@@ -44,7 +51,7 @@ export default function AdminOverview() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <StatCard label="Total Siswa" value="842" icon={Users} trend="+24 bulan ini" accent="bg-emerald-50 text-emerald-700" />
                 <StatCard label="Guru Aktif" value="56" icon={GraduationCap} trend="+2 bulan ini" accent="bg-blue-50 text-blue-700" />
-                <StatCard label="Berita Publish" value={news.length} icon={BookOpenText} hint="Total konten aktif" accent="bg-amber-50 text-amber-700" />
+                <StatCard label="Berita Publish" value={(newsStore.items || []).filter((n) => n.status === "approved" || !("status" in n)).length} icon={BookOpenText} hint="Total konten aktif" accent="bg-amber-50 text-amber-700" />
                 <StatCard label="Perlu Persetujuan" value={pending} icon={ClipboardCheck} hint="Antrian review" accent="bg-rose-50 text-rose-700" />
             </div>
 
@@ -58,7 +65,7 @@ export default function AdminOverview() {
                         <div className="text-xs font-bold text-emerald-700 bg-emerald-50 rounded-full px-3 py-1 inline-flex items-center gap-1"><TrendingUp className="w-3 h-3" />+7.9%</div>
                     </div>
                     <div className="h-72 mt-4">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
                             <AreaChart data={studentTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
@@ -79,7 +86,7 @@ export default function AdminOverview() {
                     <h3 className="font-display font-bold text-xl text-brand-950">Distribusi Program</h3>
                     <p className="text-sm text-slate-600 mt-0.5">Peminatan siswa</p>
                     <div className="h-56 mt-2">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={224}>
                             <PieChart>
                                 <Pie data={programDist} dataKey="value" innerRadius={50} outerRadius={80} paddingAngle={3}>
                                     {programDist.map((d, i) => <Cell key={i} fill={d.color} />)}
@@ -104,7 +111,7 @@ export default function AdminOverview() {
                     <h3 className="font-display font-bold text-xl text-brand-950">Pendaftar PPDB per Jalur</h3>
                     <p className="text-sm text-slate-600 mt-0.5">Tahun ajaran 2025/2026</p>
                     <div className="h-64 mt-4">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
                             <BarChart data={ppdbStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                                 <XAxis dataKey="jalur" stroke="#64748b" fontSize={12} />
@@ -119,7 +126,7 @@ export default function AdminOverview() {
                     <div className="absolute -top-16 -right-16 w-60 h-60 rounded-full bg-brand-500/30 blur-3xl" />
                     <h3 className="font-display font-bold text-xl text-white mb-4 flex items-center gap-2 relative"><Activity className="w-4 h-4 text-brand-300" />Aktivitas Terkini</h3>
                     <div className="space-y-3 relative text-sm">
-                        {activityLog.map(l => (
+                        {(logs.items || []).slice(0, 6).map(l => (
                             <div key={l.id} className="flex gap-3 text-brand-200 p-2 rounded-lg hover:bg-white/5">
                                 <span className="text-[10px] font-bold bg-brand-500/20 text-brand-300 rounded px-2 py-0.5 uppercase shrink-0 h-fit">{l.action}</span>
                                 <div className="flex-1 min-w-0">
@@ -139,10 +146,10 @@ export default function AdminOverview() {
                             <h3 className="font-display font-bold text-xl text-brand-950">Antrian Persetujuan</h3>
                             <p className="text-sm text-slate-600 mt-0.5">Konten terbaru yang perlu Anda tinjau.</p>
                         </div>
-                        <button className="text-sm font-bold text-brand-700 hover:text-brand-900 inline-flex items-center gap-1">Lihat semua <ArrowUpRight className="w-4 h-4" /></button>
+                        <button onClick={() => navigate("/admin/approval")} className="text-sm font-bold text-brand-700 hover:text-brand-900 inline-flex items-center gap-1">Lihat semua <ArrowUpRight className="w-4 h-4" /></button>
                     </div>
                     <div className="divide-y divide-slate-100">
-                        {approvalQueue.slice(0, 5).map(a => (
+                        {(approvals.items || []).slice(0, 5).map(a => (
                             <div key={a.id} className="flex items-center gap-4 py-3">
                                 <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center text-xs font-bold">{a.type.slice(0,2).toUpperCase()}</div>
                                 <div className="flex-1 min-w-0">
@@ -157,7 +164,7 @@ export default function AdminOverview() {
                 <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-100 p-6">
                     <h3 className="font-display font-bold text-brand-950 mb-4 flex items-center gap-2"><Bell className="w-4 h-4 text-brand-700" />Pesan Terbaru</h3>
                     <div className="space-y-3">
-                        {contactMessages.slice(0, 4).map(m => (
+                        {(messages.items || []).slice(0, 4).map(m => (
                             <div key={m.id} className={`p-3 rounded-xl ${m.read ? "" : "bg-brand-50/40"}`}>
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-sm text-brand-950">{m.name}</span>

@@ -7,6 +7,17 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Database Seeder - Idempotent for Production
+ * 
+ * Menjalankan seeder:
+ *   php artisan db:seed
+ *   php artisan migrate:fresh --seed (untuk testing, reset database)
+ * 
+ * Aman untuk production karena menggunakan updateOrCreate:
+ * - Tidak akan duplikat jika user sudah ada
+ * - Password default untuk initial setup, harus diubah saat login pertama
+ */
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -14,6 +25,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Admin user - initialize for production setup
         User::query()->updateOrCreate(
             ['email' => 'admin@mapulosari.sch.id'],
             [
@@ -25,6 +37,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Teacher user - for testing
         User::query()->updateOrCreate(
             ['email' => 'guru@mapulosari.sch.id'],
             [
@@ -36,6 +49,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // OSIS user - for testing
         User::query()->updateOrCreate(
             ['email' => 'osis@mapulosari.sch.id'],
             [

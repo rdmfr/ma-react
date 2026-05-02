@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { CheckCircle2, XCircle, Eye, X, User, Calendar, FileText, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, StatusBadge } from "../../components/shared/Primitives";
-import { approvalQueue } from "../../data/mockData";
+import { approvalQueue, initPublicData } from "../../data/mockData";
 import { useRecordType } from "../../hooks/useRecordType";
 import { apiGetRecord, apiUpdateRecord } from "../../lib/backend";
 
@@ -10,6 +10,7 @@ export default function AdminApproval() {
     const { items, updateItem, hasToken } = useRecordType("approvalQueue", approvalQueue);
     const [filter, setFilter] = useState("all");
     const [preview, setPreview] = useState(null);
+    const [note, setNote] = useState("");
     const filtered = filter === "all" ? items : items.filter(a => a.status === filter);
 
     const action = (item, status) => {
@@ -21,16 +22,21 @@ export default function AdminApproval() {
             toast.error("Item demo tidak bisa diubah. Buat submisi baru agar tersimpan ke backend.");
             return;
         }
-        updateItem(item.id, { ...item, status })
+        updateItem(item.id, { ...item, status, note: note || item.note || "" })
             .then(() => {
                 if (item.refId && typeof item.refId === "string") {
                     apiGetRecord(item.refId)
-                        .then((rec) => apiUpdateRecord(item.refId, { ...rec, status }))
+                        .then((rec) => {
+                            if (!rec || typeof rec !== "object") return;
+                            return apiUpdateRecord(item.refId, { ...rec, status, review_note: note || rec.review_note || "" });
+                        })
                         .catch(() => {});
                 }
                 if (status === "approved") toast.success(`"${item.title}" disetujui`);
                 else toast.error(`"${item.title}" ditolak`);
                 setPreview(null);
+                setNote("");
+                initPublicData().catch(() => {});
             })
             .catch((err) => toast.error(err?.response?.data?.message || err.message || "Gagal memproses"));
     };
@@ -55,7 +61,7 @@ export default function AdminApproval() {
                         </div>
                         <StatusBadge status={a.status} />
                         <div className="flex gap-2">
-                            <button onClick={() => setPreview(a)} className="inline-flex items-center gap-1.5 rounded-xl border border-brand-200 text-brand-700 px-3 py-2 text-xs font-bold hover:bg-brand-50" data-testid={`preview-${a.id}`}><Eye className="w-3.5 h-3.5" />Tinjau</button>
+                            <button onClick={() => { setPreview(a); setNote(a.note || ""); }} className="inline-flex items-center gap-1.5 rounded-xl border border-brand-200 text-brand-700 px-3 py-2 text-xs font-bold hover:bg-brand-50" data-testid={`preview-${a.id}`}><Eye className="w-3.5 h-3.5" />Tinjau</button>
                             {a.status === "pending" && (
                                 <>
                                     <button onClick={() => action(a, "approved")} data-testid={`approve-${a.id}`} className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-100 text-emerald-800 px-3 py-2 text-xs font-bold hover:bg-emerald-200"><CheckCircle2 className="w-3.5 h-3.5" />Setujui</button>
@@ -101,7 +107,7 @@ export default function AdminApproval() {
                             ) : (
                                 <div className="mt-6"><StatusBadge status={preview.status} /></div>
                             )}
-                            <textarea placeholder="Catatan untuk pengaju (opsional)" rows={3} className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 resize-none" data-testid="approval-note" />
+                            <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Catatan untuk pengaju (opsional)" rows={3} className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 resize-none" data-testid="approval-note" />
                         </div>
                         {preview.status === "pending" && (
                             <div className="px-7 py-4 border-t border-slate-100 flex gap-3 sticky bottom-0 bg-white">

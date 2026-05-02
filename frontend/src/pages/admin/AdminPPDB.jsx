@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Download, Users2 } from "lucide-react";
 import { PageHeader, StatusBadge, StatCard } from "../../components/shared/Primitives";
 import { ppdbRegistrants } from "../../data/mockData";
@@ -7,15 +7,40 @@ import { useRecordType } from "../../hooks/useRecordType";
 
 export default function AdminPPDB() {
     const { items, updateItem, hasToken } = useRecordType("ppdbRegistrants", ppdbRegistrants);
+    const exportCsv = () => {
+        const rows = items || [];
+        const header = ["Nama", "Asal Sekolah", "Kontak", "Status", "Tanggal"];
+        const lines = [header.join(",")].concat(rows.map((p) => {
+            const val = (x) => `"${String(x ?? "").replaceAll('"', '""')}"`;
+            return [val(p.name), val(p.school), val(p.phone), val(p.status), val(p.date)].join(",");
+        }));
+        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ppdb.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    };
+
+    const stats = useMemo(() => {
+        const list = items || [];
+        const total = list.length;
+        const diterima = list.filter((x) => x.status === "Diterima").length;
+        const wawancara = list.filter((x) => x.status === "Wawancara").length;
+        return { total, diterima, wawancara };
+    }, [items]);
     return (
         <div data-testid="admin-ppdb">
             <PageHeader title="Manajemen PPDB" description="Kelola pendaftar penerimaan siswa baru." breadcrumbs={["Admin", "PPDB"]}
-                actions={<button className="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-5 py-2.5 text-sm font-bold"><Download className="w-4 h-4" />Export Excel</button>} />
+                actions={<button onClick={exportCsv} className="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-5 py-2.5 text-sm font-bold"><Download className="w-4 h-4" />Export CSV</button>} />
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <StatCard label="Total Pendaftar" value="147" icon={Users2} trend="+12 minggu ini" />
-                <StatCard label="Diterima" value="87" hint="59% dari total" accent="bg-emerald-50 text-emerald-700" />
-                <StatCard label="Proses Wawancara" value="24" accent="bg-blue-50 text-blue-700" />
-                <StatCard label="Kuota Tersisa" value="33" hint="dari 120 kuota" accent="bg-amber-50 text-amber-700" />
+                <StatCard label="Total Pendaftar" value={stats.total} icon={Users2} />
+                <StatCard label="Diterima" value={stats.diterima} accent="bg-emerald-50 text-emerald-700" />
+                <StatCard label="Proses Wawancara" value={stats.wawancara} accent="bg-blue-50 text-blue-700" />
+                <StatCard label="Kuota Tersisa" value={Math.max(0, 120 - stats.diterima)} hint="dari 120 kuota" accent="bg-amber-50 text-amber-700" />
             </div>
             <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden">
                 <table className="w-full text-sm">

@@ -10,18 +10,21 @@ export default function AdminUsers() {
     const [items, setItems] = useState(users);
     const [editor, setEditor] = useState(null);
     const [form, setForm] = useState({ name: "", email: "", role: "teacher", status: "active", password: "", avatar_url: "" });
+    const [roleFilter, setRoleFilter] = useState("all");
 
     useEffect(() => {
         const token = localStorage.getItem(TOKEN_STORAGE_KEY);
         if (!token) return;
         apiAdminListUsers()
-            .then((list) => { if (Array.isArray(list) && list.length > 0) setItems(list); })
+            .then((list) => { setItems(Array.isArray(list) ? list : []); })
             .catch(() => {});
     }, []);
 
     const filtered = useMemo(
-        () => (items || []).filter(u => (u.name || "").toLowerCase().includes(q.toLowerCase()) || (u.email || "").toLowerCase().includes(q.toLowerCase())),
-        [items, q]
+        () => (items || [])
+            .filter((u) => roleFilter === "all" ? true : (u.role || "").toLowerCase() === roleFilter)
+            .filter(u => (u.name || "").toLowerCase().includes(q.toLowerCase()) || (u.email || "").toLowerCase().includes(q.toLowerCase())),
+        [items, q, roleFilter]
     );
 
     const openCreate = () => {
@@ -56,7 +59,8 @@ export default function AdminUsers() {
                 return;
             }
 
-            const id = editor.item?.id;
+        const id = editor.item?.id;
+        if (!id) { toast.error("Pengguna tidak valid"); return; }
             const updated = await apiAdminUpdateUser(id, {
                 name: form.name,
                 email: form.email,
@@ -83,7 +87,12 @@ export default function AdminUsers() {
                         <Search className="w-4 h-4 text-slate-500" />
                         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari pengguna..." className="flex-1 py-2.5 bg-transparent outline-none text-sm" data-testid="users-search" />
                     </div>
-                    <select className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium outline-none"><option>Semua Role</option><option>Admin</option><option>Guru</option><option>OSIS</option></select>
+                    <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium outline-none">
+                        <option value="all">Semua Role</option>
+                        <option value="admin">admin</option>
+                        <option value="teacher">teacher</option>
+                        <option value="osis">osis</option>
+                    </select>
                 </div>
                 <table className="w-full text-sm">
                     <thead className="bg-slate-50/50">
@@ -98,7 +107,7 @@ export default function AdminUsers() {
                                 <td className="px-6 py-4 text-slate-700">{u.email}</td>
                                 <td className="px-6 py-4"><span className="inline-flex items-center gap-1.5 text-[11px] font-bold bg-brand-100 text-brand-800 rounded-full px-2.5 py-0.5"><UserCog className="w-3 h-3" />{u.role}</span></td>
                                 <td className="px-6 py-4"><StatusBadge status={u.status} /></td>
-                                <td className="px-6 py-4 text-slate-600 text-xs">{u.lastLogin}</td>
+                                <td className="px-6 py-4 text-slate-600 text-xs">{u.lastLogin || u.last_login || "-"}</td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="inline-flex items-center gap-1">
                                         <button onClick={() => openEdit(u)} className="w-8 h-8 rounded-lg hover:bg-brand-50 text-brand-700 flex items-center justify-center" data-testid={`user-edit-${u.id}`}><Pencil className="w-3.5 h-3.5" /></button>

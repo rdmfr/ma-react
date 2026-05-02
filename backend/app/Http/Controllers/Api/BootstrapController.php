@@ -25,7 +25,6 @@ class BootstrapController extends Controller
                 'galleries',
                 'faqs',
                 'modules',
-                'agendaItems',
             ];
         }
 
@@ -60,11 +59,11 @@ class BootstrapController extends Controller
 
         if ($scope === 'osis') {
             return [
-                'osisAnnouncements',
-                'osisEvents',
-                'osisGallery',
-                'osisWorks',
-                'osisExtra',
+                'announcements',
+                'events',
+                'galleries',
+                'studentWorks',
+                'extracurriculars',
                 'notifications',
             ];
         }
@@ -95,7 +94,19 @@ class BootstrapController extends Controller
     public function public()
     {
         $types = $this->getTypes('public');
-        return response()->json($this->fetchByTypes($types));
+        $data = $this->fetchByTypes($types);
+        foreach ($data as $type => $items) {
+            if (!is_array($items)) continue;
+            $data[$type] = collect($items)
+                ->filter(function ($it) {
+                    if (!is_array($it)) return false;
+                    if (!array_key_exists('status', $it) || $it['status'] === null || $it['status'] === '') return true;
+                    return $it['status'] === 'approved';
+                })
+                ->values()
+                ->all();
+        }
+        return response()->json($data);
     }
 
     public function dashboard(Request $request)
@@ -130,4 +141,3 @@ class BootstrapController extends Controller
         return response()->json($this->fetchByTypes($types));
     }
 }
-

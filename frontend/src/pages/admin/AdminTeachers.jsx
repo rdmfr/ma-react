@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Plus, Star, Pencil, Trash2, X } from "lucide-react";
 import { PageHeader } from "../../components/shared/Primitives";
-import { teachers } from "../../data/mockData";
+import { initPublicData, teachers } from "../../data/mockData";
 import { toast } from "sonner";
 import { useRecordType } from "../../hooks/useRecordType";
-import { apiCreateRecordMultipart } from "../../lib/backend";
+import { apiCreateRecordMultipart, apiUpdateRecordWithFile } from "../../lib/backend";
+import { apiWrapper, validateFormData, validateFile, getErrorMessage } from "../../lib/api";
 
 export default function AdminTeachers() {
     const { items, setItems, updateItem, deleteItem, hasToken } = useRecordType("teachers", teachers);
@@ -39,21 +40,41 @@ export default function AdminTeachers() {
 
     const save = async () => {
         if (!hasToken) { toast.error("Silakan login dulu"); return; }
+        
         try {
             const payload = {
-                name: form.name,
-                subject: form.subject,
-                bio: form.bio,
-                education: form.education,
-                contact: form.contact,
-                slug: form.slug || slugify(form.name),
+                name: form.name?.trim(),
+                subject: form.subject?.trim(),
+                bio: form.bio?.trim(),
+                education: form.education?.trim(),
+                contact: form.contact?.trim(),
+                slug: form.slug?.trim() || slugify(form.name),
                 is_featured: !!form.is_featured,
             };
 
+            // Validate required fields
+            const validation = validateFormData(payload, ["name", "subject"]);
+            if (!validation.valid) {
+                const errors = Object.entries(validation.errors)
+                    .map(([field, msg]) => msg)
+                    .join(" • ");
+                toast.error(errors);
+                return;
+            }
+
             if (editor.mode === "create") {
                 if (!photoFile) { toast.error("Silakan pilih foto guru"); return; }
-                const created = await apiCreateRecordMultipart("teachers", payload, photoFile);
+                
+                // Validate file
+                const fileValidation = validateFile(photoFile, { maxSizeMB: 5, allowedMimes: ["image/jpeg", "image/png", "image/webp"] });
+                if (!fileValidation.valid) {
+                    toast.error(fileValidation.error);
+                    return;
+                }
+
+                const created = await apiWrapper.createRecord("teachers", payload, photoFile);
                 setItems((prev) => [created, ...(prev || [])]);
+                initPublicData().catch(() => {});
                 toast.success("Profil guru dibuat");
                 setEditor(null);
                 return;
@@ -61,11 +82,24 @@ export default function AdminTeachers() {
 
             const it = editor.item;
             if (typeof it?.id !== "string") { toast.error("Item demo tidak bisa diubah. Buat entri baru untuk menyimpan ke backend."); return; }
-            await updateItem(it.id, { ...payload, photo: form.photo });
+            if (photoFile) {
+                const fileValidation = validateFile(photoFile, { maxSizeMB: 5, allowedMimes: ["image/jpeg", "image/png", "image/webp"] });
+                if (!fileValidation.valid) {
+                    toast.error(fileValidation.error);
+                    return;
+                }
+                const updated = await apiWrapper.updateRecord(it.id, payload, photoFile);
+                setItems((prev) => (prev || []).map((x) => (x.id === it.id ? updated : x)));
+            } else {
+                await updateItem(it.id, { ...payload, photo: form.photo });
+            }
+            initPublicData().catch(() => {});
             toast.success("Profil guru diperbarui");
             setEditor(null);
         } catch (err) {
-            toast.error(err?.response?.data?.message || err.message || "Gagal menyimpan");
+            const errorMsg = getErrorMessage(err);
+            toast.error(errorMsg);
+            console.error("[AdminTeachers] Save error:", err);
         }
     };
 
@@ -76,7 +110,7 @@ export default function AdminTeachers() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {items.map(t => (
                     <div key={t.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden card-lift" data-testid={`teacher-card-${t.id}`}>
-                        <div className="aspect-square relative"><img src={t.photo} alt={t.name} className="w-full h-full object-cover" />
+                        <div className="aspect-square relative"><img src={t.photo || `https://i.pravatar.cc/400?u=${encodeURIComponent(t.slug || t.name || t.id)}`} alt={t.name} className="w-full h-full object-cover" />
                             {t.is_featured && <span className="absolute top-2 right-2 bg-white/95 backdrop-blur rounded-full px-2 py-1 text-[10px] font-bold text-amber-700 inline-flex items-center gap-1"><Star className="w-3 h-3 fill-amber-500 text-amber-500" />Unggulan</span>}
                         </div>
                         <div className="p-4">
@@ -88,7 +122,7 @@ export default function AdminTeachers() {
                                     onClick={async () => {
                                         if (!hasToken) { toast.error("Silakan login dulu"); return; }
                                         if (typeof t.id !== "string") { toast.error("Item demo tidak bisa dihapus"); return; }
-                                        try { await deleteItem(t.id); toast.success("Profil guru dihapus"); } catch (err) { toast.error(err?.response?.data?.message || err.message || "Gagal menghapus"); }
+                                        try { await deleteItem(t.id); initPublicData().catch(() => {}); toast.success("Profil guru dihapus"); } catch (err) { toast.error(err?.response?.data?.message || err.message || "Gagal menghapus"); }
                                     }}
                                     className="w-8 h-8 rounded-lg hover:bg-red-50 text-red-600 flex items-center justify-center"
                                 >
@@ -115,14 +149,10 @@ export default function AdminTeachers() {
                                 <div><label className="text-sm font-semibold text-brand-950">Nama</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
                                 <div><label className="text-sm font-semibold text-brand-950">Mapel</label><input value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
                             </div>
-                            {editor.mode === "create" ? (
-                                <div>
-                                    <label className="text-sm font-semibold text-brand-950">Foto</label>
-                                    <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 bg-white" />
-                                </div>
-                            ) : (
-                                <div><label className="text-sm font-semibold text-brand-950">Foto URL</label><input value={form.photo} onChange={e => setForm({ ...form, photo: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
-                            )}
+                            <div>
+                                <label className="text-sm font-semibold text-brand-950">Foto</label>
+                                <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 bg-white" />
+                            </div>
                             <div><label className="text-sm font-semibold text-brand-950">Bio</label><textarea rows={3} value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 resize-none" /></div>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div><label className="text-sm font-semibold text-brand-950">Pendidikan</label><input value={form.education} onChange={e => setForm({ ...form, education: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
