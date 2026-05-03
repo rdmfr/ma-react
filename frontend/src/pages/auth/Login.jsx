@@ -24,8 +24,14 @@ export default function Login() {
             toast.success(`Selamat datang, ${u.name}!`);
             navigate(`/${u.role}`);
         } catch (err) {
-            setError(err.message || "Gagal masuk");
-            toast.error(err.message);
+            const status = err?.response?.status;
+            const apiMessage = err?.response?.data?.message;
+            const msg =
+                status === 429
+                    ? "Terlalu banyak percobaan login. Tunggu sebentar lalu coba lagi."
+                    : apiMessage || err?.message || "Gagal masuk";
+            setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }

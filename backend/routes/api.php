@@ -35,8 +35,8 @@ Route::middleware('throttle:30,1')->group(function () {
     Route::post('/public/student-works/{record}/download', [PublicDownloadController::class, 'studentWork']);
 });
 
-// Auth endpoints - strict rate limiting for login
-Route::middleware('throttle:5,1')->post('/auth/login', [AuthController::class, 'login']);
+// Auth endpoints - rate limiting for login
+Route::middleware('throttle:login')->post('/auth/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
