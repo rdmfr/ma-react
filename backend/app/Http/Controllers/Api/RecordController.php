@@ -9,6 +9,16 @@ use Illuminate\Support\Facades\Storage;
 
 class RecordController extends Controller
 {
+    private const EXTRACURRICULAR_CATEGORIES = [
+        'multimedia',
+        'pmr',
+        'pramuka',
+        'marawiss',
+        'hadroh',
+        'olahraga',
+        'kesenian',
+    ];
+
     private function logActivity(Request $request, string $action, string $target): void
     {
         try {
@@ -236,12 +246,44 @@ class RecordController extends Controller
         $errors = [];
 
         switch ($type) {
+            case 'branding':
+                if (empty($data['schoolName'])) {
+                    $errors['schoolName'] = 'Nama sekolah wajib diisi';
+                }
+                break;
+
             case 'teachers':
                 if (empty($data['name'])) {
                     $errors['name'] = 'Nama guru wajib diisi';
                 }
                 if (empty($data['subject'])) {
                     $errors['subject'] = 'Mata pelajaran wajib diisi';
+                }
+                break;
+
+            case 'extracurriculars':
+                if (empty($data['name'])) {
+                    $errors['name'] = 'Nama ekstrakurikuler wajib diisi';
+                }
+                if (empty($data['slug'])) {
+                    $errors['slug'] = 'Slug wajib diisi';
+                }
+                break;
+
+            case 'programStudies':
+                if (empty($data['name'])) {
+                    $errors['name'] = 'Nama jurusan/program wajib diisi';
+                }
+                break;
+
+            case 'galleries':
+                if (empty($data['title'])) {
+                    $errors['title'] = 'Judul galeri wajib diisi';
+                }
+                if (empty($data['category'])) {
+                    $errors['category'] = 'Kategori galeri wajib diisi';
+                } elseif (!in_array($data['category'], self::EXTRACURRICULAR_CATEGORIES, true)) {
+                    $errors['category'] = 'Kategori galeri tidak valid';
                 }
                 break;
 

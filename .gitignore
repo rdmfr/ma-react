@@ -1,6 +1,7 @@
 # IDE / Editor
 .idea/
 .vscode/
+.trae/
 
 # Node
 **/node_modules/

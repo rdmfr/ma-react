@@ -13,6 +13,7 @@ class BootstrapController extends Controller
     {
         if ($scope === 'public') {
             return [
+                'branding',
                 'teachers',
                 'news',
                 'reflections',
@@ -30,6 +31,7 @@ class BootstrapController extends Controller
 
         if ($scope === 'admin') {
             return [
+                'branding',
                 'subjects',
                 'teachers',
                 'students',

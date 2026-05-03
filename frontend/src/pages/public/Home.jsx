@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowUpRight, CalendarDays, Sparkles, Trophy, Users, BookOpen, ShieldCheck, Play, Quote, Heart, MapPin, Star } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarDays, Sparkles, Trophy, Users, BookOpen, ShieldCheck, Play, Quote, Heart, MapPin, Star, Images } from "lucide-react";
 import { useBranding } from "../../context/BrandingContext";
-import { news, events, teachers, programStudies, alumni, stats } from "../../data/mockData";
+import { news, events, teachers, programStudies, alumni, stats, studentWorks, galleries, EXTRACURRICULAR_CATEGORIES } from "../../data/mockData";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 
@@ -13,6 +13,11 @@ export default function Home() {
     const featuredNews = news.filter(n => !n.status || n.status === "approved").slice(0, 3);
     const upcoming = events.filter(e => !e.status || e.status === "approved").slice(0, 4);
     const featuredTeachers = teachers.filter(t => (!t.status || t.status === "approved") && t.is_featured).slice(0, 4);
+    const featuredWorks = studentWorks.filter(w => !w.status || w.status === "approved").slice(0, 6);
+    const latestGallery = galleries.filter(g => !g.status || g.status === "approved").slice(0, 6);
+
+    const categoryLabel = (value) => EXTRACURRICULAR_CATEGORIES.find((c) => c.value === value)?.label || value || "Kegiatan";
+    const photoFor = (t) => t.photo || `https://i.pravatar.cc/600?u=${encodeURIComponent(t.slug || t.name || t.id)}`;
 
     return (
         <div data-testid="home-page">
@@ -33,7 +38,7 @@ export default function Home() {
                                 Tumbuh cerdas,<br />berakhlak di <span className="font-editorial italic font-semibold text-brand-300 whitespace-nowrap">{branding.schoolShort}</span>.
                             </h1>
                             <p className="mt-6 text-base sm:text-lg text-brand-100/85 max-w-xl leading-relaxed">
-                                {branding.schoolName} adalah madrasah berakreditasi A yang memadukan keilmuan modern dengan nilai-nilai Islam — membentuk generasi pembelajar sepanjang hayat.
+                                {branding.schoolName} adalah madrasah berakreditasi {branding.accreditationLabel || "B"} yang memadukan keilmuan modern dengan nilai-nilai Islam — membentuk generasi pembelajar sepanjang hayat.
                             </p>
                             <div className="mt-9 flex flex-wrap gap-3">
                                 <Link to="/ppdb" data-testid="hero-cta-ppdb" className="inline-flex items-center gap-2 rounded-full bg-white text-brand-950 px-6 py-3.5 text-sm font-bold hover:bg-brand-100 transition">
@@ -54,7 +59,7 @@ export default function Home() {
                         </div>
                         <div className="lg:col-span-5 relative">
                             <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl shadow-black/30">
-                                <img src="https://images.unsplash.com/photo-1610208322247-18af7775da05?w=900&q=80" alt="Students" className="w-full h-full object-cover" />
+                                <img src={branding.heroImageUrl} alt={branding.heroImageAlt || "Kegiatan siswa"} className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-brand-950/70 to-transparent" />
                                 <div className="absolute bottom-5 left-5 right-5 glass rounded-2xl p-4 flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white">
@@ -68,7 +73,7 @@ export default function Home() {
                             </div>
                             <div className="absolute -top-6 -left-6 w-28 h-28 rounded-3xl glass-dark grid place-items-center rotate-[-8deg]">
                                 <div className="text-center">
-                                    <div className="font-display font-black text-4xl text-brand-300">A</div>
+                                    <div className="font-display font-black text-4xl text-brand-300">{branding.accreditationLabel || "B"}</div>
                                     <div className="text-[10px] uppercase tracking-widest text-brand-200">Akreditasi</div>
                                 </div>
                             </div>
@@ -144,8 +149,8 @@ export default function Home() {
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
                 <div className="flex items-end justify-between gap-6 flex-wrap">
                     <div>
-                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700"><span className="inline-block w-8 h-px bg-brand-500 mr-2 align-middle" />Guru Unggulan</div>
-                        <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-brand-950 mt-3 tracking-tight">Para pendidik berdedikasi.</h2>
+                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700"><span className="inline-block w-8 h-px bg-brand-500 mr-2 align-middle" />Guru, Pengurus, & Staf</div>
+                        <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-brand-950 mt-3 tracking-tight">Tim sekolah yang melayani.</h2>
                     </div>
                     <Link to="/guru" className="inline-flex items-center gap-2 text-sm font-bold text-brand-700 hover:text-brand-900">Lihat Semua <ArrowUpRight className="w-4 h-4" /></Link>
                 </div>
@@ -153,12 +158,63 @@ export default function Home() {
                     {featuredTeachers.map((t) => (
                         <Link key={t.id} to={`/guru/${t.slug}`} className="group" data-testid={`home-teacher-${t.id}`}>
                             <div className="aspect-[3/4] rounded-3xl overflow-hidden relative bg-brand-100">
-                                <img src={t.photo} alt={t.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                                <img src={photoFor(t)} alt={t.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-brand-950/80 to-transparent" />
                                 <div className="absolute bottom-4 left-4 right-4 text-white">
                                     <div className="text-[10px] uppercase tracking-[0.2em] text-brand-300 font-bold">{t.subject}</div>
                                     <div className="font-display font-bold text-lg leading-tight mt-1">{t.name}</div>
                                 </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </section>
+
+            {/* STUDENT WORKS */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+                <div className="flex items-end justify-between gap-6 flex-wrap">
+                    <div>
+                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700"><span className="inline-block w-8 h-px bg-brand-500 mr-2 align-middle" />Karya Siswa</div>
+                        <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-brand-950 mt-3 tracking-tight">Karya yang lahir dari proses.</h2>
+                    </div>
+                    <Link to="/karya-siswa" className="inline-flex items-center gap-2 text-sm font-bold text-brand-700 hover:text-brand-900">Lihat Semua <ArrowUpRight className="w-4 h-4" /></Link>
+                </div>
+                <div className="mt-10 grid md:grid-cols-3 gap-6">
+                    {featuredWorks.map((w) => (
+                        <Link key={w.id} to="/karya-siswa" className="bg-white rounded-3xl border border-slate-100 overflow-hidden card-lift" data-testid={`home-work-${w.id}`}>
+                            <div className="aspect-[4/3] overflow-hidden bg-brand-100"><img src={w.image} alt={w.title} className="w-full h-full object-cover" /></div>
+                            <div className="p-6">
+                                <div className="text-[10px] uppercase tracking-wider text-brand-600 font-bold">{w.category}</div>
+                                <div className="font-display font-extrabold text-xl text-brand-950 mt-1 line-clamp-2">{w.title}</div>
+                                <div className="text-xs text-slate-600 mt-2">{w.author}</div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </section>
+
+            {/* GALLERY */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+                <div className="flex items-end justify-between gap-6 flex-wrap">
+                    <div>
+                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700"><span className="inline-block w-8 h-px bg-brand-500 mr-2 align-middle" />Galeri Kegiatan</div>
+                        <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-brand-950 mt-3 tracking-tight">Momen kebersamaan kami.</h2>
+                    </div>
+                    <Link to="/galeri" className="inline-flex items-center gap-2 text-sm font-bold text-brand-700 hover:text-brand-900">Buka Galeri <ArrowUpRight className="w-4 h-4" /></Link>
+                </div>
+                <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {latestGallery.map((g) => (
+                        <Link key={g.id} to={`/galeri?kategori=${encodeURIComponent(g.category || "")}`} className="group relative overflow-hidden rounded-3xl border border-slate-100 bg-white card-lift" data-testid={`home-gallery-${g.id}`}>
+                            <div className="aspect-[4/3] overflow-hidden">
+                                <img src={g.cover} alt={g.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-brand-950/85 via-brand-950/25 to-transparent" />
+                            <div className="absolute bottom-5 left-5 right-5 text-white">
+                                <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur rounded-full px-2.5 py-1">
+                                    <Images className="w-3 h-3" /> {categoryLabel(g.category)}
+                                </div>
+                                <div className="font-display font-bold text-xl mt-2 leading-tight">{g.title}</div>
+                                <div className="text-xs text-brand-300 mt-1">{format(new Date(g.date), "d MMM yyyy", { locale: idLocale })}</div>
                             </div>
                         </Link>
                     ))}

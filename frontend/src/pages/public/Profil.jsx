@@ -12,10 +12,10 @@ export default function Profil() {
         { icon: ShieldCheck, title: "Berintegritas", desc: "Jujur, amanah, dan bertanggung jawab." },
     ];
     const organ = [
-        { name: "Ahmad Fauzi, M.Pd", role: "Kepala Madrasah", photo: "https://images.unsplash.com/photo-1515994034738-1f437c226687?w=300&q=80" },
-        { name: "Siti Nurhaliza, S.Pd", role: "Wakamad Kurikulum", photo: "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=300&q=80" },
-        { name: "Dewi Kartika, S.Si", role: "Wakamad Kesiswaan", photo: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?w=300&q=80" },
-        { name: "Rahmat Hidayat, Lc", role: "Wakamad Hubmas", photo: "https://images.unsplash.com/photo-1545696968-1a5245650b36?w=300&q=80" },
+        { name: "K.H. Abdurrahman, M.Pd.I", role: "Ketua Yayasan", photo: "https://i.pravatar.cc/300?u=kh-abdurrahman-mpdi" },
+        { name: "Imron Abdul Rojak, M.Si.", role: "Kepala Sekolah", photo: "https://i.pravatar.cc/300?u=imron-abdul-rojak-msi" },
+        { name: "Sofwan Saeful Malik, M.Pd.", role: "Wakasek Bid. Akademik", photo: "https://i.pravatar.cc/300?u=sofwan-saeful-malik" },
+        { name: "Azmi Amrullah, S.Pd.", role: "Wakasek Bid. Kesiswaan", photo: "https://i.pravatar.cc/300?u=azmi-amrullah" },
     ];
 
     return (
@@ -24,10 +24,10 @@ export default function Profil() {
                 <div className="lg:col-span-5 lg:sticky lg:top-28">
                     <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-700"><span className="inline-block w-8 h-px bg-brand-500 mr-2 align-middle" />Tentang Kami</div>
                     <h1 className="font-display text-5xl lg:text-6xl font-black text-brand-950 mt-4 tracking-tight leading-[0.95]">Madrasah <span className="font-editorial italic text-brand-700">berakhlak</span> & berprestasi.</h1>
-                    <p className="mt-6 text-brand-800/85 leading-relaxed">{branding.schoolName} berdiri sejak 1998, tumbuh sebagai madrasah aliyah berakreditasi A di Kab. Garut, Jawa Barat. Kami menggabungkan tradisi keilmuan Islam klasik dengan pendekatan pendidikan modern untuk mencetak lulusan yang siap berkontribusi di manapun.</p>
+                    <p className="mt-6 text-brand-800/85 leading-relaxed">{branding.schoolName} berdiri sejak 1998, tumbuh sebagai madrasah aliyah berakreditasi {branding.accreditationLabel || "B"} di Kab. Garut, Jawa Barat. Kami menggabungkan tradisi keilmuan Islam klasik dengan pendekatan pendidikan modern untuk mencetak lulusan yang siap berkontribusi di manapun.</p>
                     <div className="mt-8 grid grid-cols-3 gap-3">
                         <div className="rounded-2xl bg-white border border-slate-100 p-4 card-lift"><div className="font-display font-black text-2xl text-brand-950">1998</div><div className="text-xs text-slate-600 mt-1">Berdiri</div></div>
-                        <div className="rounded-2xl bg-white border border-slate-100 p-4 card-lift"><div className="font-display font-black text-2xl text-brand-950">A</div><div className="text-xs text-slate-600 mt-1">Akreditasi</div></div>
+                        <div className="rounded-2xl bg-white border border-slate-100 p-4 card-lift"><div className="font-display font-black text-2xl text-brand-950">{branding.accreditationLabel || "B"}</div><div className="text-xs text-slate-600 mt-1">Akreditasi</div></div>
                         <div className="rounded-2xl bg-white border border-slate-100 p-4 card-lift"><div className="font-display font-black text-2xl text-brand-950">842+</div><div className="text-xs text-slate-600 mt-1">Siswa</div></div>
                     </div>
                 </div>

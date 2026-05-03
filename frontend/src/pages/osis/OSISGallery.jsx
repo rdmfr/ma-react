@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Plus, Upload, Images, X } from "lucide-react";
 import { PageHeader, StatusBadge } from "../../components/shared/Primitives";
-import { galleries } from "../../data/mockData";
+import { galleries, EXTRACURRICULAR_CATEGORIES } from "../../data/mockData";
 import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { apiCreateRecord, apiCreateRecordWithFile } from "../../lib/backend";
@@ -11,7 +11,7 @@ export default function OSISGallery() {
     const { user } = useAuth();
     const galleriesApi = useRecordType("galleries", galleries);
     const [editor, setEditor] = useState(false);
-    const [form, setForm] = useState({ title: "", cover: "", date: new Date().toISOString().slice(0, 10), count: 0 });
+    const [form, setForm] = useState({ title: "", category: EXTRACURRICULAR_CATEGORIES[0]?.value || "multimedia", cover: "", date: new Date().toISOString().slice(0, 10), count: 1 });
     const [coverFile, setCoverFile] = useState(null);
 
     const myItems = useMemo(() => {
@@ -19,12 +19,14 @@ export default function OSISGallery() {
         return galleriesApi.items.filter((g) => !g.submittedBy || g.submittedBy === email);
     }, [galleriesApi.items, user]);
 
+    const labelFor = (value) => EXTRACURRICULAR_CATEGORIES.find((c) => c.value === value)?.label || value;
+
     return (
         <div data-testid="osis-gallery">
-            <PageHeader title="Galeri Kegiatan" description="Unggah album foto kegiatan untuk ditampilkan di galeri publik." breadcrumbs={["OSIS", "Galeri"]}
-                actions={<button onClick={() => { setForm({ title: "", cover: "", date: new Date().toISOString().slice(0, 10), count: 0 }); setCoverFile(null); setEditor(true); }} className="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-5 py-2.5 text-sm font-bold"><Plus className="w-4 h-4" />Album Baru</button>} />
+            <PageHeader title="Galeri Kegiatan" description="Unggah foto kegiatan dan pilih kategori untuk ditampilkan di galeri publik." breadcrumbs={["OSIS", "Galeri"]}
+                actions={<button onClick={() => { setForm({ title: "", category: EXTRACURRICULAR_CATEGORIES[0]?.value || "multimedia", cover: "", date: new Date().toISOString().slice(0, 10), count: 1 }); setCoverFile(null); setEditor(true); }} className="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-5 py-2.5 text-sm font-bold"><Plus className="w-4 h-4" />Upload Foto</button>} />
             <button
-                onClick={() => { setForm({ title: "", cover: "", date: new Date().toISOString().slice(0, 10), count: 0 }); setCoverFile(null); setEditor(true); }}
+                onClick={() => { setForm({ title: "", category: EXTRACURRICULAR_CATEGORIES[0]?.value || "multimedia", cover: "", date: new Date().toISOString().slice(0, 10), count: 1 }); setCoverFile(null); setEditor(true); }}
                 onDragOver={(e) => { e.preventDefault(); }}
                 onDrop={(e) => {
                     e.preventDefault();
@@ -38,7 +40,7 @@ export default function OSISGallery() {
             >
                 <Upload className="w-10 h-10 text-brand-700 mx-auto" />
                 <div className="font-display font-bold text-brand-950 text-lg mt-3">Seret foto ke sini untuk upload cepat</div>
-                <div className="text-sm text-slate-600 mt-1">JPG, PNG, WEBP · Maks 5MB per foto</div>
+                <div className="text-sm text-slate-600 mt-1">JPG, PNG, WEBP · Maks 5MB</div>
             </button>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {myItems.map((g, i) => (
@@ -49,7 +51,7 @@ export default function OSISGallery() {
                                 <h3 className="font-display font-bold text-brand-950">{g.title}</h3>
                                 <StatusBadge status={g.status || (i % 3 === 0 ? "pending" : "approved")} />
                             </div>
-                            <div className="mt-2 text-xs text-slate-600 inline-flex items-center gap-1"><Images className="w-3 h-3" />{g.count} foto · {g.date}</div>
+                            <div className="mt-2 text-xs text-slate-600 inline-flex items-center gap-1"><Images className="w-3 h-3" />{g.category ? `${labelFor(g.category)} · ` : ""}{g.count} foto · {g.date}</div>
                         </div>
                     </div>
                 ))}
@@ -60,15 +62,23 @@ export default function OSISGallery() {
                     <div className="bg-white rounded-3xl max-w-xl w-full overflow-hidden" onClick={e => e.stopPropagation()}>
                         <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <div className="text-xs font-bold uppercase tracking-wider text-brand-700">Album Baru</div>
-                                <h3 className="font-display font-extrabold text-2xl text-brand-950 mt-0.5">{form.title || "Album"}</h3>
+                                <div className="text-xs font-bold uppercase tracking-wider text-brand-700">Upload Foto</div>
+                                <h3 className="font-display font-extrabold text-2xl text-brand-950 mt-0.5">{form.title || "Foto Kegiatan"}</h3>
                             </div>
                             <button onClick={() => { setEditor(false); setCoverFile(null); }} className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center"><X className="w-4 h-4" /></button>
                         </div>
                         <div className="p-7 space-y-4">
                             <div><label className="text-sm font-semibold text-brand-950">Judul</label><input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" /></div>
                             <div>
-                                <label className="text-sm font-semibold text-brand-950">Cover</label>
+                                <label className="text-sm font-semibold text-brand-950">Kategori</label>
+                                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500">
+                                    {EXTRACURRICULAR_CATEGORIES.map((c) => (
+                                        <option key={c.value} value={c.value}>{c.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-semibold text-brand-950">Foto</label>
                                 <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 bg-white" />
                                 <div className="mt-2 text-xs text-slate-500">Atau isi URL cover (opsional)</div>
                                 <input value={form.cover} onChange={e => setForm({ ...form, cover: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" placeholder="https://..." />
@@ -84,13 +94,13 @@ export default function OSISGallery() {
                                 onClick={async () => {
                                     if (!galleriesApi.hasToken) { toast.error("Silakan login dulu"); return; }
                                     try {
-                                        const payload = { title: form.title, cover: form.cover, date: form.date, count: Number(form.count) || 0, status: "pending", submittedBy: user?.email };
+                                        const payload = { title: form.title, category: form.category, cover: form.cover, date: form.date, count: Number(form.count) || 1, status: "pending", submittedBy: user?.email };
                                         const created = coverFile
                                             ? await apiCreateRecordWithFile("galleries", payload, coverFile, "cover")
                                             : await galleriesApi.createItem(payload);
                                         if (coverFile) galleriesApi.setItems((prev) => [created, ...(prev || [])]);
                                         await apiCreateRecord("approvalQueue", { type: "Gallery", title: form.title, submittedBy: user?.email, date: form.date, status: "pending", refType: "galleries", refId: created.id });
-                                        toast.success("Album diajukan ke admin");
+                                        toast.success("Foto diajukan ke admin");
                                         setEditor(false);
                                         setCoverFile(null);
                                     } catch (err) {

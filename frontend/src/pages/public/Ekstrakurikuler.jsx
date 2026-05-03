@@ -1,6 +1,7 @@
 import React from "react";
 import { Clock, User } from "lucide-react";
 import { extracurriculars } from "../../data/mockData";
+import { Link } from "react-router-dom";
 
 export default function Ekstrakurikuler() {
     const visible = extracurriculars.filter((e) => !e.status || e.status === "approved");
@@ -12,7 +13,7 @@ export default function Ekstrakurikuler() {
             </div>
             <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visible.map((e) => (
-                    <div key={e.id} className="group relative overflow-hidden rounded-3xl border border-slate-100 bg-white card-lift" data-testid={`ekskul-${e.id}`}>
+                    <Link key={e.id} to={`/galeri?kategori=${encodeURIComponent(e.slug || "")}`} className="group relative overflow-hidden rounded-3xl border border-slate-100 bg-white card-lift" data-testid={`ekskul-${e.id}`}>
                         <div className="aspect-[4/3] overflow-hidden">
                             <img src={e.image} alt={e.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
                         </div>
@@ -24,7 +25,7 @@ export default function Ekstrakurikuler() {
                                 <span className="inline-flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-brand-600" /> {e.coach}</span>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </div>

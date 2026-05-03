@@ -1,6 +1,17 @@
 // Centralized mock data for MA PULOSARI v3.0
 
 import { apiDashboardBootstrap, apiPublicBootstrap } from "../lib/backend";
+import { BRANDING_STORAGE_KEY } from "../context/BrandingContext";
+
+export const EXTRACURRICULAR_CATEGORIES = [
+    { value: "multimedia", label: "Multimedia" },
+    { value: "pmr", label: "PMR" },
+    { value: "pramuka", label: "Pramuka" },
+    { value: "marawiss", label: "Marawis" },
+    { value: "hadroh", label: "Hadroh" },
+    { value: "olahraga", label: "Olahraga" },
+    { value: "kesenian", label: "Kesenian" },
+];
 
 const listeners = new Set();
 
@@ -20,7 +31,7 @@ export const stats = [
     { label: "Siswa Aktif", value: "842", icon: "Users" },
     { label: "Guru & Staff", value: "56", icon: "GraduationCap" },
     { label: "Prestasi", value: "120+", icon: "Trophy" },
-    { label: "Akreditasi", value: "A", icon: "ShieldCheck" },
+    { label: "Akreditasi", value: "B", icon: "ShieldCheck" },
 ];
 
 export const subjects = [
@@ -39,14 +50,41 @@ export const subjects = [
 ];
 
 export const teachers = [
-    { id: 1, slug: "siti-nurhaliza", name: "Siti Nurhaliza, S.Pd", subject: "Matematika", photo: "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=400&q=80", bio: "Pengajar Matematika dengan pengalaman 12 tahun, lulusan UGM.", education: "S1 Pendidikan Matematika, UGM", contact: "siti.n@mapulosari.sch.id", is_featured: true },
-    { id: 2, slug: "ahmad-fauzi", name: "Ahmad Fauzi, M.Pd", subject: "Bahasa Indonesia", photo: "https://images.unsplash.com/photo-1515994034738-1f437c226687?w=400&q=80", bio: "Kepala Madrasah. Penulis 5 buku pendidikan karakter.", education: "S2 Pendidikan Bahasa, UNNES", contact: "ahmad.f@mapulosari.sch.id", is_featured: true },
-    { id: 3, slug: "dewi-kartika", name: "Dewi Kartika, S.Si", subject: "Fisika", photo: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?w=400&q=80", bio: "Pembina klub sains, meraih penghargaan guru inovatif 2024.", education: "S1 Fisika, ITB", contact: "dewi.k@mapulosari.sch.id", is_featured: true },
-    { id: 4, slug: "rahmat-hidayat", name: "Rahmat Hidayat, Lc", subject: "Bahasa Arab", photo: "https://images.unsplash.com/photo-1545696968-1a5245650b36?w=400&q=80", bio: "Lulusan Al-Azhar Mesir, fokus pada nahwu sharaf.", education: "Lc Al-Azhar Kairo", contact: "rahmat.h@mapulosari.sch.id", is_featured: true },
-    { id: 5, slug: "farah-amalia", name: "Farah Amalia, S.Pd", subject: "Biologi", photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80", bio: "Pembina ekstrakurikuler KIR Biologi.", education: "S1 Biologi, UNDIP", contact: "farah.a@mapulosari.sch.id" },
-    { id: 6, slug: "bambang-sutrisno", name: "Bambang Sutrisno, S.Pd", subject: "Sejarah", photo: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=80", bio: "Penggiat sejarah lokal Garut.", education: "S1 Sejarah, UNES", contact: "bambang.s@mapulosari.sch.id" },
-    { id: 7, slug: "husna-fitri", name: "Husna Fitri, M.Pd", subject: "Bahasa Inggris", photo: "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=400&q=80", bio: "IELTS Certified Trainer.", education: "S2 TESOL, University of Melbourne", contact: "husna.f@mapulosari.sch.id" },
-    { id: 8, slug: "yusuf-mahendra", name: "Yusuf Mahendra, S.Pd.I", subject: "Fikih", photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&q=80", bio: "Pengajar kitab kuning & fikih kontemporer.", education: "S1 PAI, UIN Walisongo", contact: "yusuf.m@mapulosari.sch.id" },
+    { id: 1, slug: "kh-abdurrahman-mpdi", name: "K.H. Abdurrahman, M.Pd.I", subject: "Ketua Yayasan", photo: "", bio: "", education: "", contact: "", is_featured: true },
+    { id: 2, slug: "imron-abdul-rojak-msi", name: "Imron Abdul Rojak, M.Si.", subject: "Kepala Sekolah", photo: "", bio: "", education: "", contact: "", is_featured: true },
+    { id: 3, slug: "sofwan-saeful-malik-mpd", name: "Sofwan Saeful Malik, M.Pd.", subject: "Wakasek Bid. Akademik / Aqidah & SKI", photo: "", bio: "", education: "", contact: "", is_featured: true },
+    { id: 4, slug: "azmi-amrullah-spd", name: "Azmi Amrullah, S.Pd.", subject: "Wakasek Bid. Kesiswaan / Biologi", photo: "", bio: "", education: "", contact: "", is_featured: true },
+    { id: 5, slug: "asep-kusdrajat", name: "Asep Kusdrajat", subject: "Bendahara / Bahasa Sunda", photo: "", bio: "", education: "", contact: "" },
+    { id: 6, slug: "hj-nani-nuraeni-sag-mm", name: "Hj. Nani Nuraeni, S.Ag., MM.", subject: "Al-Qur'an Hadits / Ilmu Hadits", photo: "", bio: "", education: "", contact: "" },
+    { id: 7, slug: "faisal-mag", name: "Faisal, M.Ag.", subject: "Ilmu Tafsir", photo: "", bio: "", education: "", contact: "" },
+    { id: 8, slug: "kh-cecep-suhrowardi-spd", name: "KH. Cecep Suhrowardi, S.Pd.", subject: "Bahasa Indonesia", photo: "", bio: "", education: "", contact: "" },
+    { id: 9, slug: "kh-asep-saepul-hidayat-spd-mm", name: "KH. Asep Saepul Hidayat, S.Pd., MM.", subject: "Bahasa Arab", photo: "", bio: "", education: "", contact: "" },
+    { id: 10, slug: "h-ade-hasyim-spd", name: "H. Ade Hasyim, S.Pd.", subject: "Bahasa Indonesia", photo: "", bio: "", education: "", contact: "" },
+    { id: 11, slug: "dra-hj-ai-diniah", name: "Dra. Hj. Ai Diniah", subject: "Matematika", photo: "", bio: "", education: "", contact: "" },
+    { id: 12, slug: "drs-h-sobarudin-mm", name: "Drs. H. Sobarudin, MM.", subject: "Kimia", photo: "", bio: "", education: "", contact: "" },
+    { id: 13, slug: "tatu-samsudin-sag", name: "Tatu Samsudin, S.Ag.", subject: "PJOK", photo: "", bio: "", education: "", contact: "" },
+    { id: 14, slug: "iim-abdurrohim-sag", name: "Iim Abdurrohim, S.Ag.", subject: "Ilmu Hadits", photo: "", bio: "", education: "", contact: "" },
+    { id: 15, slug: "wildan-m-taufik-spdi", name: "Wildan M. Taufik, S.Pd.I.", subject: "Fiqih / Ushul Fiqih", photo: "", bio: "", education: "", contact: "" },
+    { id: 16, slug: "dewi-faridaturrosidah-spd", name: "Dewi Faridaturrosidah, S.Pd.", subject: "Prakarya", photo: "", bio: "", education: "", contact: "" },
+    { id: 17, slug: "teten-hanafiah-spd", name: "Teten Hanafiah, S.Pd..", subject: "Fisika", photo: "", bio: "", education: "", contact: "" },
+    { id: 18, slug: "rudi-aziz-permana-spd", name: "Rudi Aziz Permana, S.Pd.", subject: "Matematika", photo: "", bio: "", education: "", contact: "" },
+    { id: 19, slug: "heni-rohaeni-spd", name: "Heni Rohaeni, S.Pd.", subject: "Matematika", photo: "", bio: "", education: "", contact: "" },
+    { id: 20, slug: "rifah-muharromah-spdi", name: "Rifah Muharromah, S.Pd.I.", subject: "SKI", photo: "", bio: "", education: "", contact: "" },
+    { id: 21, slug: "diki-taqiyudin-sh", name: "Diki Taqiyudin, SH.", subject: "PPKn", photo: "", bio: "", education: "", contact: "" },
+    { id: 22, slug: "budi-amaludin-spd", name: "Budi Amaludin, S.Pd.", subject: "Seni Budaya", photo: "", bio: "", education: "", contact: "" },
+    { id: 23, slug: "rima-nabila-nuzula-mpd", name: "Rima Nabila Nuzula, M.Pd.", subject: "Bahasa Inggris", photo: "", bio: "", education: "", contact: "" },
+    { id: 24, slug: "ana-nasirotul-haq-spd", name: "Ana Nasirotul Haq, S.Pd.", subject: "Fisika", photo: "", bio: "", education: "", contact: "" },
+    { id: 25, slug: "mila-fauzi-amaliah-spd", name: "Mila Fauzi Amaliah, S.Pd.", subject: "Bahasa Inggris", photo: "", bio: "", education: "", contact: "" },
+    { id: 26, slug: "siti-shofiatin-spd", name: "Siti Shofiatin, S,Pd.", subject: "Ekonomi", photo: "", bio: "", education: "", contact: "" },
+    { id: 27, slug: "didah-fauziah-spd", name: "Didah Fauziah, S.Pd.", subject: "Sejarah Indonesia", photo: "", bio: "", education: "", contact: "" },
+    { id: 28, slug: "n-lina-yulianti-spd", name: "N. Lina Yulianti, S.Pd.", subject: "Biologi", photo: "", bio: "", education: "", contact: "" },
+    { id: 29, slug: "yuyus-hilman-farid-ssos", name: "Yuyus Hilman Farid, S.Sos.", subject: "PPKn", photo: "", bio: "", education: "", contact: "" },
+    { id: 30, slug: "gilan-rifnaldi-ssos", name: "Gilan Rifnaldi, S.Sos.", subject: "Sosiologi / Sejarah Indonesia", photo: "", bio: "", education: "", contact: "" },
+    { id: 31, slug: "fina-nur-fuady-spd", name: "Fina Nur Fuady, S.Pd.", subject: "Kimia", photo: "", bio: "", education: "", contact: "" },
+    { id: 32, slug: "tasya-nailal-ulya-ssi", name: "Tasya Nailal Ulya, S.Si.", subject: "Matematika", photo: "", bio: "", education: "", contact: "" },
+    { id: 33, slug: "habibie-nashih-alhaq-shum", name: "Habibie Nashih Alhaq, S.Hum.", subject: "Tata Usaha", photo: "", bio: "", education: "", contact: "" },
+    { id: 34, slug: "ahmad-yafie-muharram-sikom", name: "Ahmad Yafie Muharram, S.I.Kom", subject: "Operator", photo: "", bio: "", education: "", contact: "" },
+    { id: 35, slug: "ee-saepudin", name: "Ee Saepudin", subject: "Pegawai Umum", photo: "", bio: "", education: "", contact: "" },
 ];
 
 export const classes = [
@@ -103,12 +141,13 @@ export const announcements = [
 ];
 
 export const extracurriculars = [
-    { id: 1, slug: "pramuka", name: "Pramuka", image: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&q=80", description: "Kegiatan kepanduan yang membentuk karakter tangguh dan mandiri.", schedule: "Jumat, 14.00 WIB", coach: "Kak Budi" },
-    { id: 2, slug: "pmr", name: "PMR (Palang Merah Remaja)", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80", description: "Pelatihan pertolongan pertama dan kemanusiaan.", schedule: "Sabtu, 08.00 WIB", coach: "Bu Farah" },
-    { id: 3, slug: "futsal", name: "Futsal", image: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80", description: "Latihan rutin sepak bola dalam ruangan.", schedule: "Selasa & Kamis, 15.30 WIB", coach: "Pak Taufik" },
-    { id: 4, slug: "hadroh", name: "Hadroh", image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=800&q=80", description: "Seni musik islami tradisional.", schedule: "Rabu, 15.00 WIB", coach: "Ust. Yusuf" },
-    { id: 5, slug: "kir", name: "Karya Ilmiah Remaja", image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=80", description: "Penelitian dan karya ilmiah siswa.", schedule: "Senin, 14.30 WIB", coach: "Bu Dewi" },
-    { id: 6, slug: "english-club", name: "English Club", image: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=800&q=80", description: "Pengembangan kemampuan berbahasa Inggris.", schedule: "Kamis, 15.00 WIB", coach: "Bu Husna" },
+    { id: 1, slug: "multimedia", name: "Multimedia", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80", description: "Kegiatan kreatif untuk desain, fotografi, dan produksi konten digital.", schedule: "Menyesuaikan jadwal sekolah", coach: "Pembina" },
+    { id: 2, slug: "pmr", name: "PMR", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80", description: "Pelatihan pertolongan pertama, kesehatan, dan aksi kemanusiaan.", schedule: "Menyesuaikan jadwal sekolah", coach: "Pembina" },
+    { id: 3, slug: "pramuka", name: "Pramuka", image: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&q=80", description: "Kepanduan untuk membentuk karakter tangguh, disiplin, dan mandiri.", schedule: "Menyesuaikan jadwal sekolah", coach: "Pembina" },
+    { id: 4, slug: "marawiss", name: "Marawis", image: "https://images.unsplash.com/photo-1519682577862-22b62b24e493?w=800&q=80", description: "Seni musik islami marawis untuk mengasah bakat dan kekompakan.", schedule: "Menyesuaikan jadwal sekolah", coach: "Pembina" },
+    { id: 5, slug: "hadroh", name: "Hadroh", image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=800&q=80", description: "Seni hadroh untuk melatih ritme, vokal sholawat, dan adab tampil.", schedule: "Menyesuaikan jadwal sekolah", coach: "Pembina" },
+    { id: 6, slug: "olahraga", name: "Olahraga", image: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80", description: "Pembinaan kebugaran, sportivitas, dan kerja sama tim.", schedule: "Menyesuaikan jadwal sekolah", coach: "Pembina" },
+    { id: 7, slug: "kesenian", name: "Kesenian", image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80", description: "Ruang ekspresi seni untuk mengembangkan kreativitas dan apresiasi budaya.", schedule: "Menyesuaikan jadwal sekolah", coach: "Pembina" },
 ];
 
 export const studentWorks = [
@@ -121,9 +160,8 @@ export const studentWorks = [
 ];
 
 export const programStudies = [
-    { id: 1, name: "MIPA (Matematika & Ilmu Pengetahuan Alam)", icon: "Atom", description: "Program peminatan sains dengan fokus Matematika, Fisika, Kimia, dan Biologi. Cocok untuk calon saintis & dokter.", highlights: ["Lab Fisika & Biologi modern", "Klub KIR aktif", "Mentoring OSN"] },
-    { id: 2, name: "IPS (Ilmu Pengetahuan Sosial)", icon: "Globe", description: "Program peminatan sosial dengan fokus Ekonomi, Geografi, Sosiologi, dan Sejarah. Untuk calon ekonom & pendidik.", highlights: ["Simulasi ekonomi & pasar modal", "Penelitian lapangan", "Studi kasus sosial"] },
-    { id: 3, name: "Keagamaan", icon: "BookOpen", description: "Program peminatan keagamaan dengan fokus Tafsir, Hadits, Fikih, Akhlak, dan Bahasa Arab.", highlights: ["Tahfidz Al-Qur'an", "Kitab kuning", "Pembinaan da'i muda"] },
+    { id: 1, name: "MIPA (Matematika & Ilmu Pengetahuan Alam)", icon: "Atom", description: "Program peminatan sains dengan fokus Matematika, Fisika, Kimia, dan Biologi.", highlights: ["Lab sains", "Pembinaan prestasi", "Literasi & riset"] },
+    { id: 2, name: "Ilmu Agama Islam", icon: "BookOpen", description: "Program peminatan keagamaan dengan fokus Al-Qur'an Hadits, Tafsir, Fiqih, Akhlak, dan Bahasa Arab.", highlights: ["Pembinaan tahfidz", "Kajian kitab", "Bina karakter"] },
 ];
 
 export const alumni = [
@@ -136,33 +174,22 @@ export const alumni = [
 ];
 
 export const galleries = [
-    { id: 1, title: "Wisuda Angkatan XXVIII", cover: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80", date: "2024-06-15", count: 24 },
-    { id: 2, title: "Pesantren Ramadhan 2024", cover: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=800&q=80", date: "2024-04-10", count: 18 },
-    { id: 3, title: "Classmeeting Semester Ganjil", cover: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80", date: "2024-12-15", count: 32 },
-    { id: 4, title: "Studi Wisata ke Yogyakarta", cover: "https://images.unsplash.com/photo-1528181304800-259b08848526?w=800&q=80", date: "2024-10-05", count: 45 },
-    { id: 5, title: "Peringatan Hari Santri", cover: "https://images.unsplash.com/photo-1564769625392-651b2c0f1c4b?w=800&q=80", date: "2024-10-22", count: 20 },
-    { id: 6, title: "Pelantikan OSIS 2024/2025", cover: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=800&q=80", date: "2024-09-10", count: 15 },
-];
-
-export const galleryPhotos = [
-    "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1200&q=80",
-    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80",
-    "https://images.unsplash.com/photo-1528181304800-259b08848526?w=1200&q=80",
-    "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=1200&q=80",
-    "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1200&q=80",
-    "https://images.unsplash.com/photo-1564769625392-651b2c0f1c4b?w=1200&q=80",
-    "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1200&q=80",
-    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=1200&q=80",
-    "https://images.unsplash.com/photo-1604933834413-4e60c5e7c033?w=1200&q=80",
+    { id: 1, title: "Kegiatan Multimedia", category: "multimedia", cover: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80", date: "2024-06-15", count: 1 },
+    { id: 2, title: "Latihan PMR", category: "pmr", cover: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80", date: "2024-04-10", count: 1 },
+    { id: 3, title: "Kegiatan Pramuka", category: "pramuka", cover: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=800&q=80", date: "2024-12-15", count: 1 },
+    { id: 4, title: "Marawis", category: "marawiss", cover: "https://images.unsplash.com/photo-1519682577862-22b62b24e493?w=800&q=80", date: "2024-10-05", count: 1 },
+    { id: 5, title: "Hadroh", category: "hadroh", cover: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=800&q=80", date: "2024-10-22", count: 1 },
+    { id: 6, title: "Olahraga", category: "olahraga", cover: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80", date: "2024-09-10", count: 1 },
+    { id: 7, title: "Kesenian", category: "kesenian", cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80", date: "2024-08-21", count: 1 },
 ];
 
 export const faqs = [
     { id: 1, category: "PPDB", q: "Bagaimana cara mendaftar di MA Pulosari?", a: "Pendaftaran dilakukan secara online melalui website atau datang langsung ke sekretariat PPDB." },
     { id: 2, category: "PPDB", q: "Kapan jadwal penerimaan siswa baru dibuka?", a: "PPDB dibuka setiap awal tahun ajaran, biasanya pada bulan Maret s.d Juni." },
-    { id: 3, category: "Akademik", q: "Apa saja program studi yang tersedia?", a: "MA Pulosari memiliki 3 program peminatan: MIPA, IPS, dan Keagamaan." },
+    { id: 3, category: "Akademik", q: "Apa saja program studi yang tersedia?", a: "MAS YPI Pulosari memiliki 2 program peminatan: MIPA dan Ilmu Agama Islam." },
     { id: 4, category: "Akademik", q: "Bagaimana sistem penilaian rapor?", a: "Penilaian mengikuti Kurikulum Merdeka dengan bobot: Harian 40%, UTS 25%, UAS 35%." },
     { id: 5, category: "Fasilitas", q: "Apakah tersedia asrama untuk siswa?", a: "Ya, kami menyediakan asrama putra dan putri yang nyaman dan aman." },
-    { id: 6, category: "Fasilitas", q: "Kegiatan ekstrakurikuler apa saja yang ada?", a: "Tersedia 12 ekstrakurikuler: Pramuka, PMR, Futsal, Hadroh, KIR, English Club, dll." },
+    { id: 6, category: "Fasilitas", q: "Kegiatan ekstrakurikuler apa saja yang ada?", a: "Tersedia ekstrakurikuler: Multimedia, PMR, Pramuka, Marawis, Hadroh, Olahraga, dan Kesenian." },
     { id: 7, category: "Biaya", q: "Berapa biaya pendidikan per bulan?", a: "Biaya pendidikan bervariasi mulai dari Rp 350.000. Rincian lengkap di bagian kontak." },
 ];
 
@@ -221,6 +248,9 @@ const hydrateArray = (target, items) => {
 
 const hydrateFromBootstrap = (payload) => {
     if (!payload || typeof payload !== "object") return;
+    if (Array.isArray(payload.branding) && payload.branding[0] && typeof payload.branding[0] === "object") {
+        try { localStorage.setItem(BRANDING_STORAGE_KEY, JSON.stringify(payload.branding[0])); } catch { }
+    }
     hydrateArray(subjects, payload.subjects);
     hydrateArray(teachers, payload.teachers);
     hydrateArray(classes, payload.classes);

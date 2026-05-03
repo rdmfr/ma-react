@@ -3,7 +3,7 @@ import { Plus, Newspaper, Images, Megaphone, BookMarked, CalendarRange, MessageS
 import { toast } from "sonner";
 import { PageHeader } from "../../components/shared/Primitives";
 import RichEditor from "../../components/dashboard/RichEditor";
-import { initPublicData, news, galleries, announcements, studentWorks, events, reflections, faqs } from "../../data/mockData";
+import { initPublicData, news, galleries, announcements, studentWorks, events, reflections, faqs, EXTRACURRICULAR_CATEGORIES } from "../../data/mockData";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { useRecordType } from "../../hooks/useRecordType";
@@ -46,8 +46,31 @@ export default function AdminContent() {
     };
     const currentStore = storeByActive[active];
 
-    const openCreate = () => { setForm({ title: "", category: "Akademik", excerpt: "", content: "", image: "", featured: false, status: "approved" }); setImageFile(null); setImagePreview(""); setEditor({ mode: "create" }); };
-    const openEdit = (it) => { setForm({ title: it.title || it.name || it.q || "", category: it.category || "Akademik", excerpt: it.excerpt || it.a || "", content: it.content || "", image: it.image || it.cover || it.photo || "", featured: it.is_featured || it.pinned || false, status: it.status || "approved" }); setImageFile(null); setImagePreview(""); setEditor({ mode: "edit", item: it }); };
+    const defaultCategory = (tab) => {
+        if (tab === "gallery") return EXTRACURRICULAR_CATEGORIES[0]?.value || "multimedia";
+        return "Akademik";
+    };
+
+    const openCreate = () => {
+        setForm({ title: "", category: defaultCategory(active), excerpt: "", content: "", image: "", featured: false, status: "approved" });
+        setImageFile(null);
+        setImagePreview("");
+        setEditor({ mode: "create" });
+    };
+    const openEdit = (it) => {
+        setForm({
+            title: it.title || it.name || it.q || "",
+            category: it.category || defaultCategory(active),
+            excerpt: it.excerpt || it.a || "",
+            content: it.content || "",
+            image: it.image || it.cover || it.photo || "",
+            featured: it.is_featured || it.pinned || false,
+            status: it.status || "approved",
+        });
+        setImageFile(null);
+        setImagePreview("");
+        setEditor({ mode: "edit", item: it });
+    };
     const slugify = (s) => (s || "").toString().toLowerCase().trim()
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
@@ -119,6 +142,7 @@ export default function AdminContent() {
             return {
                 title: form.title,
                 cover: form.image,
+                category: form.category,
                 date: existing?.date || today,
                 count: existing?.count ?? 0,
                 status,
@@ -168,6 +192,32 @@ export default function AdminContent() {
         }
 
         return null;
+    };
+
+    const renderCategorySelect = () => {
+        if (active === "gallery") {
+            return (
+                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500">
+                    {EXTRACURRICULAR_CATEGORIES.map((c) => (
+                        <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                </select>
+            );
+        }
+
+        return (
+            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500">
+                <option>Akademik</option><option>Prestasi</option><option>Kegiatan</option><option>Pengumuman</option>
+            </select>
+        );
+    };
+
+    const categoryLabel = (value) => EXTRACURRICULAR_CATEGORIES.find((c) => c.value === value)?.label || value;
+    const itemMeta = (d) => {
+        if (d.date) return format(new Date(d.date), "d MMM yyyy", { locale: idLocale });
+        if (d.author) return d.author;
+        if (active === "gallery" && d.category) return categoryLabel(d.category);
+        return d.category;
     };
 
     const save = async ({ status } = {}) => {
@@ -246,7 +296,7 @@ export default function AdminContent() {
                                     {(d.image || d.cover || d.photo) ? <img src={d.image || d.cover || d.photo} className="w-12 h-12 rounded-xl object-cover" alt="" /> : <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center"><current.icon className="w-4 h-4" /></div>}
                                     <div className="flex-1 min-w-0">
                                         <div className="font-semibold text-brand-950 truncate">{d.title || d.name || d.q}</div>
-                                        <div className="text-xs text-slate-600 mt-0.5">{d.date ? format(new Date(d.date), "d MMM yyyy", { locale: idLocale }) : d.author || d.category}</div>
+                                        <div className="text-xs text-slate-600 mt-0.5">{itemMeta(d)}</div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => openEdit(d)} className="text-xs font-bold text-brand-700 hover:text-brand-900 px-3 py-1.5 rounded-lg hover:bg-brand-50" data-testid={`content-edit-${d.id}`}>Edit</button>
@@ -295,9 +345,7 @@ export default function AdminContent() {
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-sm font-semibold text-brand-950">Kategori</label>
-                                    <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500">
-                                        <option>Akademik</option><option>Prestasi</option><option>Kegiatan</option><option>Pengumuman</option>
-                                    </select>
+                                    {renderCategorySelect()}
                                 </div>
                                 <div>
                                     <label className="text-sm font-semibold text-brand-950">Atribut</label>

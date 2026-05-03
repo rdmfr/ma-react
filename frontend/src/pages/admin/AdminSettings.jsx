@@ -3,17 +3,45 @@ import { Upload, RefreshCw, Palette, Save, Image as ImageIcon, Building2, Mail, 
 import { toast } from "sonner";
 import { PageHeader } from "../../components/shared/Primitives";
 import { useBranding } from "../../context/BrandingContext";
+import { apiCreateRecord, apiListRecords, apiUpdateRecord } from "../../lib/backend";
 
 export default function AdminSettings() {
     const { branding, updateBranding, resetBranding } = useBranding();
     const [form, setForm] = useState(branding);
     const [tab, setTab] = useState("branding");
+    const [saving, setSaving] = useState(false);
 
-    const save = () => { updateBranding(form); toast.success("Pengaturan tersimpan. Perubahan aktif di seluruh aplikasi."); };
+    const save = async () => {
+        if (saving) return;
+        setSaving(true);
+        try {
+            const existing = await apiListRecords("branding", 1);
+            const first = Array.isArray(existing) ? existing[0] : null;
+            if (first?.id) {
+                await apiUpdateRecord(first.id, form);
+            } else {
+                await apiCreateRecord("branding", form);
+            }
+            updateBranding(form);
+            toast.success("Pengaturan tersimpan. Perubahan akan tampil di halaman publik.");
+        } catch (e) {
+            toast.error("Gagal menyimpan pengaturan. Coba lagi.");
+        } finally {
+            setSaving(false);
+        }
+    };
     const onLogoFile = (e) => {
         const file = e.target.files?.[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = () => setForm(f => ({ ...f, logoUrl: reader.result }));
+        reader.readAsDataURL(file);
+    };
+
+    const onHeroFile = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => setForm((f) => ({ ...f, heroImageUrl: reader.result }));
         reader.readAsDataURL(file);
     };
     const doReset = () => { resetBranding(); setForm({ ...branding }); toast.success("Pengaturan dikembalikan ke default"); setTimeout(() => window.location.reload(), 400); };
@@ -29,7 +57,7 @@ export default function AdminSettings() {
             <PageHeader title="Pengaturan & Branding" description="Ubah identitas sekolah — logo, nama, dan kontak — yang akan aktif di login page hingga dashboard public." breadcrumbs={["Admin", "Pengaturan"]} actions={
                 <>
                     <button onClick={doReset} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-brand-900 hover:bg-slate-50" data-testid="settings-reset"><RefreshCw className="w-4 h-4" />Reset</button>
-                    <button onClick={save} className="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-bold shadow-lg shadow-brand-900/20" data-testid="settings-save"><Save className="w-4 h-4" />Simpan</button>
+                    <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-bold shadow-lg shadow-brand-900/20 disabled:opacity-60 disabled:cursor-not-allowed" data-testid="settings-save"><Save className="w-4 h-4" />{saving ? "Menyimpan..." : "Simpan"}</button>
                 </>
             } />
 
@@ -76,6 +104,10 @@ export default function AdminSettings() {
                                         <label className="text-sm font-semibold text-brand-950">Tagline</label>
                                         <input value={form.schoolTagline} onChange={e => setForm({...form, schoolTagline: e.target.value})} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" data-testid="settings-school-tagline" />
                                     </div>
+                                    <div>
+                                        <label className="text-sm font-semibold text-brand-950">Akreditasi</label>
+                                        <input value={form.accreditationLabel || ""} onChange={e => setForm({ ...form, accreditationLabel: e.target.value })} className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" placeholder="B" data-testid="settings-accreditation" />
+                                    </div>
                                 </div>
                             </div>
 
@@ -100,6 +132,38 @@ export default function AdminSettings() {
                                                 <div className="text-xs text-slate-500">PNG/JPG · Maks 2MB</div>
                                             </div>
                                             <input type="file" accept="image/*" className="hidden" onChange={onLogoFile} data-testid="settings-logo-file" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-3xl border border-slate-100 p-8">
+                                <h3 className="font-display font-bold text-xl text-brand-950 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-brand-700" />Gambar Utama (Hero)</h3>
+                                <p className="text-sm text-slate-600 mt-1">Gambar ini tampil di bagian utama halaman Home publik. JPG/PNG · Maks 3MB.</p>
+                                <div className="mt-6 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
+                                    <div className="w-40 h-40 rounded-2xl border border-brand-100 bg-brand-50/50 p-2 overflow-hidden">
+                                        <img src={form.heroImageUrl} alt={form.heroImageAlt || "hero"} className="w-full h-full object-cover rounded-xl" data-testid="settings-hero-preview" />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="block">
+                                            <div className="text-sm font-semibold text-brand-950 mb-1.5">URL Gambar Hero</div>
+                                            <input value={form.heroImageUrl || ""} onChange={e => setForm({ ...form, heroImageUrl: e.target.value })} placeholder="https://..." className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" data-testid="settings-hero-url" />
+                                        </label>
+                                        <label className="block">
+                                            <div className="text-sm font-semibold text-brand-950 mb-1.5">Alt Text</div>
+                                            <input value={form.heroImageAlt || ""} onChange={e => setForm({ ...form, heroImageAlt: e.target.value })} placeholder="Kegiatan siswa" className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" data-testid="settings-hero-alt" />
+                                        </label>
+                                        <div className="text-xs text-slate-500 text-center relative">
+                                            <span className="bg-white px-3">atau</span>
+                                            <span className="absolute inset-x-0 top-1/2 -z-10 h-px bg-slate-200" />
+                                        </div>
+                                        <label className="block cursor-pointer">
+                                            <div className="border-2 border-dashed border-brand-200 rounded-xl p-6 text-center hover:bg-brand-50/40 transition">
+                                                <Upload className="w-5 h-5 text-brand-700 mx-auto" />
+                                                <div className="text-sm font-semibold text-brand-900 mt-2">Upload gambar hero</div>
+                                                <div className="text-xs text-slate-500">JPG/PNG · Maks 3MB</div>
+                                            </div>
+                                            <input type="file" accept="image/*" className="hidden" onChange={onHeroFile} data-testid="settings-hero-file" />
                                         </label>
                                     </div>
                                 </div>

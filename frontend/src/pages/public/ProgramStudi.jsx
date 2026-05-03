@@ -11,7 +11,7 @@ export default function ProgramStudi() {
                 <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-700"><span className="inline-block w-8 h-px bg-brand-500 mr-2 align-middle" />Program Studi</div>
                 <h1 className="font-display text-5xl lg:text-6xl font-black text-brand-950 mt-4 tracking-tight leading-[0.95]">Pilih jalur <span className="font-editorial italic text-brand-700">peminatan</span>mu.</h1>
             </div>
-            <div className="mt-12 grid md:grid-cols-3 gap-6">
+            <div className="mt-12 grid md:grid-cols-2 gap-6">
                 {programStudies.map((p, i) => {
                     const Icon = ICONS[p.icon] || BookOpen;
                     const isMid = i === 1;
