@@ -15,6 +15,8 @@ export default function Home() {
     const featuredTeachers = teachers.filter(t => (!t.status || t.status === "approved") && t.is_featured).slice(0, 4);
     const featuredWorks = studentWorks.filter(w => !w.status || w.status === "approved").slice(0, 6);
     const latestGallery = galleries.filter(g => !g.status || g.status === "approved").slice(0, 6);
+    const featuredAlumni = alumni.filter(a => !a.status || a.status === "approved");
+    const primaryAlumni = featuredAlumni[0] || null;
 
     const categoryLabel = (value) => EXTRACURRICULAR_CATEGORIES.find((c) => c.value === value)?.label || value || "Kegiatan";
     const photoFor = (t) => t.photo || `https://i.pravatar.cc/600?u=${encodeURIComponent(t.slug || t.name || t.id)}`;
@@ -259,11 +261,11 @@ export default function Home() {
                         <div className="mt-10 pt-6 border-t border-brand-800 flex items-center gap-4 relative">
                             <img src="https://images.unsplash.com/photo-1515994034738-1f437c226687?w=120&q=80" alt="" className="w-14 h-14 rounded-full object-cover" />
                             <div>
-                                <div className="font-display font-bold">{alumni[0].name}</div>
-                                <div className="text-xs text-brand-300">Alumni Angkatan {alumni[0].year}</div>
+                                <div className="font-display font-bold">{primaryAlumni?.name || "Alumni"}</div>
+                                <div className="text-xs text-brand-300">{primaryAlumni?.year ? `Alumni Angkatan ${primaryAlumni.year}` : "Testimoni alumni akan tampil di sini"}</div>
                             </div>
                         </div>
-                        <p className="text-sm text-brand-200 leading-relaxed mt-4 relative">{alumni[0].testimonial}</p>
+                        <p className="text-sm text-brand-200 leading-relaxed mt-4 relative">{primaryAlumni?.testimonial || "Belum ada data alumni. Admin bisa menambahkan testimoni alumni dari dashboard."}</p>
                     </div>
                 </div>
             </section>
