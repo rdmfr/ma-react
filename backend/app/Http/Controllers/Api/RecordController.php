@@ -36,6 +36,20 @@ class RecordController extends Controller
         }
     }
 
+    private function absolutePublicUrl(string $url): string
+    {
+        if ($url === '') {
+            return $url;
+        }
+        if (preg_match('/^https?:\/\//i', $url)) {
+            return $url;
+        }
+        if (str_starts_with($url, '/')) {
+            return rtrim(config('app.url') ?? '', '/') . $url;
+        }
+        return $url;
+    }
+
     public function index(Request $request)
     {
         $validated = $request->validate([
@@ -81,9 +95,8 @@ class RecordController extends Controller
 
         $data = $validated['data'];
         if (is_string($data)) {
-            try {
-                $data = json_decode($data, true);
-            } catch (\Exception $e) {
+            $data = json_decode($data, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'Data JSON tidak valid', 'errors' => ['data' => 'JSON tidak valid']], 422);
             }
         }
@@ -105,14 +118,14 @@ class RecordController extends Controller
             $photo = $request->file('photo');
             if ($photo) {
                 $path = Storage::disk('public')->putFile('uploads/' . $validated['type'], $photo);
-                $data['photo'] = Storage::url($path);
+                $data['photo'] = $this->absolutePublicUrl(Storage::url($path));
             }
 
             $file = $request->file('file');
             if ($file) {
                 $path = Storage::disk('public')->putFile('uploads/' . $validated['type'], $file);
                 $field = $validated['file_field'] ?? 'photo';
-                $data[$field] = Storage::url($path);
+                $data[$field] = $this->absolutePublicUrl(Storage::url($path));
             }
 
             $record = Record::query()->create([
@@ -150,9 +163,8 @@ class RecordController extends Controller
 
         $data = $validated['data'];
         if (is_string($data)) {
-            try {
-                $data = json_decode($data, true);
-            } catch (\Exception $e) {
+            $data = json_decode($data, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'Data JSON tidak valid', 'errors' => ['data' => 'JSON tidak valid']], 422);
             }
         }
@@ -174,14 +186,14 @@ class RecordController extends Controller
             $photo = $request->file('photo');
             if ($photo) {
                 $path = Storage::disk('public')->putFile('uploads/' . $record->type, $photo);
-                $data['photo'] = Storage::url($path);
+                $data['photo'] = $this->absolutePublicUrl(Storage::url($path));
             }
 
             $file = $request->file('file');
             if ($file) {
                 $path = Storage::disk('public')->putFile('uploads/' . $record->type, $file);
                 $field = $validated['file_field'] ?? 'photo';
-                $data[$field] = Storage::url($path);
+                $data[$field] = $this->absolutePublicUrl(Storage::url($path));
             }
 
             $record->forceFill(['data' => $data])->save();

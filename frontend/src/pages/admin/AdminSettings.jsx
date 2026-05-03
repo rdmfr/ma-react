@@ -1,15 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Upload, RefreshCw, Palette, Save, Image as ImageIcon, Building2, Mail, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "../../components/shared/Primitives";
 import { useBranding } from "../../context/BrandingContext";
-import { apiCreateRecord, apiListRecords, apiUpdateRecord } from "../../lib/backend";
+import { apiCreateRecord, apiListRecords, apiUpdateRecord, apiUpdateRecordWithFile } from "../../lib/backend";
 
 export default function AdminSettings() {
     const { branding, updateBranding, resetBranding } = useBranding();
     const [form, setForm] = useState(branding);
     const [tab, setTab] = useState("branding");
     const [saving, setSaving] = useState(false);
+    const [logoFile, setLogoFile] = useState(null);
+    const [heroFile, setHeroFile] = useState(null);
+    const [logoPreviewUrl, setLogoPreviewUrl] = useState("");
+    const [heroPreviewUrl, setHeroPreviewUrl] = useState("");
+
+    useEffect(() => {
+        return () => {
+            if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl);
+            if (heroPreviewUrl) URL.revokeObjectURL(heroPreviewUrl);
+        };
+    }, [logoPreviewUrl, heroPreviewUrl]);
+
+    const previewLogoSrc = useMemo(() => logoPreviewUrl || form.logoUrl, [logoPreviewUrl, form.logoUrl]);
+    const previewHeroSrc = useMemo(() => heroPreviewUrl || form.heroImageUrl, [heroPreviewUrl, form.heroImageUrl]);
 
     const save = async () => {
         if (saving) return;
@@ -17,12 +31,39 @@ export default function AdminSettings() {
         try {
             const existing = await apiListRecords("branding", 1);
             const first = Array.isArray(existing) ? existing[0] : null;
+            const baseData = { ...form };
+            if (logoFile) delete baseData.logoUrl;
+            if (heroFile) delete baseData.heroImageUrl;
+
+            let current;
             if (first?.id) {
-                await apiUpdateRecord(first.id, form);
+                current = await apiUpdateRecord(first.id, baseData);
             } else {
-                await apiCreateRecord("branding", form);
+                current = await apiCreateRecord("branding", baseData);
             }
-            updateBranding(form);
+
+            if (logoFile) {
+                const { id, ...data } = current || {};
+                current = await apiUpdateRecordWithFile(id, data, logoFile, "logoUrl");
+            }
+            if (heroFile) {
+                const { id, ...data } = current || {};
+                current = await apiUpdateRecordWithFile(id, data, heroFile, "heroImageUrl");
+            }
+
+            if (current) {
+                const { id, ...data } = current;
+                updateBranding(data);
+                setForm(data);
+            } else {
+                updateBranding(form);
+            }
+            setLogoFile(null);
+            setHeroFile(null);
+            if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl);
+            if (heroPreviewUrl) URL.revokeObjectURL(heroPreviewUrl);
+            setLogoPreviewUrl("");
+            setHeroPreviewUrl("");
             toast.success("Pengaturan tersimpan. Perubahan akan tampil di halaman publik.");
         } catch (e) {
             toast.error("Gagal menyimpan pengaturan. Coba lagi.");
@@ -31,18 +72,29 @@ export default function AdminSettings() {
         }
     };
     const onLogoFile = (e) => {
-        const file = e.target.files?.[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => setForm(f => ({ ...f, logoUrl: reader.result }));
-        reader.readAsDataURL(file);
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error("Logo maksimal 2MB");
+            e.target.value = "";
+            return;
+        }
+        setLogoFile(file);
+        if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl);
+        setLogoPreviewUrl(URL.createObjectURL(file));
     };
 
     const onHeroFile = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => setForm((f) => ({ ...f, heroImageUrl: reader.result }));
-        reader.readAsDataURL(file);
+        if (file.size > 3 * 1024 * 1024) {
+            toast.error("Gambar hero maksimal 3MB");
+            e.target.value = "";
+            return;
+        }
+        setHeroFile(file);
+        if (heroPreviewUrl) URL.revokeObjectURL(heroPreviewUrl);
+        setHeroPreviewUrl(URL.createObjectURL(file));
     };
     const doReset = () => { resetBranding(); setForm({ ...branding }); toast.success("Pengaturan dikembalikan ke default"); setTimeout(() => window.location.reload(), 400); };
 
@@ -75,7 +127,7 @@ export default function AdminSettings() {
                         <div className="text-xs font-bold uppercase tracking-wider text-brand-700">Live Preview</div>
                         <div className="mt-3 bg-white rounded-xl p-4 border border-slate-100">
                             <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-lg bg-white border border-slate-100 p-1"><img src={form.logoUrl} alt="" className="w-full h-full object-contain" /></div>
+                                <div className="w-9 h-9 rounded-lg bg-white border border-slate-100 p-1"><img src={previewLogoSrc} alt="" className="w-full h-full object-contain" /></div>
                                 <div className="leading-tight">
                                     <div className="font-display font-extrabold text-brand-950 text-sm">{form.schoolName}</div>
                                     <div className="text-[9px] text-brand-700">{form.schoolTagline}</div>
@@ -115,7 +167,7 @@ export default function AdminSettings() {
                                 <h3 className="font-display font-bold text-xl text-brand-950 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-brand-700" />Logo Sekolah</h3>
                                 <p className="text-sm text-slate-600 mt-1">Rasio persegi. PNG transparan direkomendasikan. Maks 2MB.</p>
                                 <div className="mt-6 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
-                                    <div className="w-40 h-40 rounded-2xl border border-brand-100 bg-brand-50/50 p-4 flex items-center justify-center"><img src={form.logoUrl} alt="logo preview" className="max-w-full max-h-full object-contain" data-testid="settings-logo-preview" /></div>
+                                    <div className="w-40 h-40 rounded-2xl border border-brand-100 bg-brand-50/50 p-4 flex items-center justify-center"><img src={previewLogoSrc} alt="logo preview" className="max-w-full max-h-full object-contain" data-testid="settings-logo-preview" /></div>
                                     <div className="space-y-3">
                                         <label className="block">
                                             <div className="text-sm font-semibold text-brand-950 mb-1.5">URL Logo</div>
@@ -142,7 +194,7 @@ export default function AdminSettings() {
                                 <p className="text-sm text-slate-600 mt-1">Gambar ini tampil di bagian utama halaman Home publik. JPG/PNG · Maks 3MB.</p>
                                 <div className="mt-6 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
                                     <div className="w-40 h-40 rounded-2xl border border-brand-100 bg-brand-50/50 p-2 overflow-hidden">
-                                        <img src={form.heroImageUrl} alt={form.heroImageAlt || "hero"} className="w-full h-full object-cover rounded-xl" data-testid="settings-hero-preview" />
+                                        <img src={previewHeroSrc} alt={form.heroImageAlt || "hero"} className="w-full h-full object-cover rounded-xl" data-testid="settings-hero-preview" />
                                     </div>
                                     <div className="space-y-3">
                                         <label className="block">
