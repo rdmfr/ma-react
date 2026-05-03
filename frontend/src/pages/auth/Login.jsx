@@ -77,7 +77,7 @@ export default function Login() {
                             <div className="text-xs text-brand-300 mt-1">Siswa aktif</div>
                         </div>
                         <div className="glass-dark rounded-2xl p-4">
-                            <div className="font-display font-black text-3xl">A</div>
+                            <div className="font-display font-black text-3xl">{branding.accreditationLabel || "B"}</div>
                             <div className="text-xs text-brand-300 mt-1">Akreditasi</div>
                         </div>
                     </div>

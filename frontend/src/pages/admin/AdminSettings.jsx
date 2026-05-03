@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Upload, RefreshCw, Palette, Save, Image as ImageIcon, Building2, Mail, Phone, MapPin } from "lucide-react";
+import { Upload, RefreshCw, Palette, Save, Image as ImageIcon, Building2, Mail, Phone, MapPin, Target } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "../../components/shared/Primitives";
 import { useBranding } from "../../context/BrandingContext";
@@ -12,18 +12,22 @@ export default function AdminSettings() {
     const [saving, setSaving] = useState(false);
     const [logoFile, setLogoFile] = useState(null);
     const [heroFile, setHeroFile] = useState(null);
+    const [profileFile, setProfileFile] = useState(null);
     const [logoPreviewUrl, setLogoPreviewUrl] = useState("");
     const [heroPreviewUrl, setHeroPreviewUrl] = useState("");
+    const [profilePreviewUrl, setProfilePreviewUrl] = useState("");
 
     useEffect(() => {
         return () => {
             if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl);
             if (heroPreviewUrl) URL.revokeObjectURL(heroPreviewUrl);
+            if (profilePreviewUrl) URL.revokeObjectURL(profilePreviewUrl);
         };
-    }, [logoPreviewUrl, heroPreviewUrl]);
+    }, [logoPreviewUrl, heroPreviewUrl, profilePreviewUrl]);
 
     const previewLogoSrc = useMemo(() => logoPreviewUrl || form.logoUrl, [logoPreviewUrl, form.logoUrl]);
     const previewHeroSrc = useMemo(() => heroPreviewUrl || form.heroImageUrl, [heroPreviewUrl, form.heroImageUrl]);
+    const previewProfileSrc = useMemo(() => profilePreviewUrl || form.profileImageUrl || form.heroImageUrl, [profilePreviewUrl, form.profileImageUrl, form.heroImageUrl]);
 
     const save = async () => {
         if (saving) return;
@@ -34,6 +38,7 @@ export default function AdminSettings() {
             const baseData = { ...form };
             if (logoFile) delete baseData.logoUrl;
             if (heroFile) delete baseData.heroImageUrl;
+            if (profileFile) delete baseData.profileImageUrl;
 
             let current;
             if (first?.id) {
@@ -50,6 +55,10 @@ export default function AdminSettings() {
                 const { id, ...data } = current || {};
                 current = await apiUpdateRecordWithFile(id, data, heroFile, "heroImageUrl");
             }
+            if (profileFile) {
+                const { id, ...data } = current || {};
+                current = await apiUpdateRecordWithFile(id, data, profileFile, "profileImageUrl");
+            }
 
             if (current) {
                 const { id, ...data } = current;
@@ -60,10 +69,13 @@ export default function AdminSettings() {
             }
             setLogoFile(null);
             setHeroFile(null);
+            setProfileFile(null);
             if (logoPreviewUrl) URL.revokeObjectURL(logoPreviewUrl);
             if (heroPreviewUrl) URL.revokeObjectURL(heroPreviewUrl);
+            if (profilePreviewUrl) URL.revokeObjectURL(profilePreviewUrl);
             setLogoPreviewUrl("");
             setHeroPreviewUrl("");
+            setProfilePreviewUrl("");
             toast.success("Pengaturan tersimpan. Perubahan akan tampil di halaman publik.");
         } catch (e) {
             toast.error("Gagal menyimpan pengaturan. Coba lagi.");
@@ -95,6 +107,19 @@ export default function AdminSettings() {
         setHeroFile(file);
         if (heroPreviewUrl) URL.revokeObjectURL(heroPreviewUrl);
         setHeroPreviewUrl(URL.createObjectURL(file));
+    };
+
+    const onProfileFile = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error("Foto profil maksimal 4MB");
+            e.target.value = "";
+            return;
+        }
+        setProfileFile(file);
+        if (profilePreviewUrl) URL.revokeObjectURL(profilePreviewUrl);
+        setProfilePreviewUrl(URL.createObjectURL(file));
     };
     const doReset = () => { resetBranding(); setForm({ ...branding }); toast.success("Pengaturan dikembalikan ke default"); setTimeout(() => window.location.reload(), 400); };
 
@@ -217,6 +242,63 @@ export default function AdminSettings() {
                                             </div>
                                             <input type="file" accept="image/*" className="hidden" onChange={onHeroFile} data-testid="settings-hero-file" />
                                         </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-3xl border border-slate-100 p-8">
+                                <h3 className="font-display font-bold text-xl text-brand-950 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-brand-700" />Foto Profil Madrasah</h3>
+                                <p className="text-sm text-slate-600 mt-1">Foto ini tampil di halaman Profil publik. JPG/PNG · Maks 4MB.</p>
+                                <div className="mt-6 grid sm:grid-cols-[auto,1fr] gap-6 items-start">
+                                    <div className="w-40 h-40 rounded-2xl border border-brand-100 bg-brand-50/50 p-2 overflow-hidden">
+                                        <img src={previewProfileSrc} alt={form.profileImageAlt || form.schoolName || "profil"} className="w-full h-full object-cover rounded-xl" data-testid="settings-profile-preview" />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="block">
+                                            <div className="text-sm font-semibold text-brand-950 mb-1.5">URL Foto Profil</div>
+                                            <input value={form.profileImageUrl || ""} onChange={e => setForm({ ...form, profileImageUrl: e.target.value })} placeholder="https://..." className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" data-testid="settings-profile-url" />
+                                        </label>
+                                        <label className="block">
+                                            <div className="text-sm font-semibold text-brand-950 mb-1.5">Alt Text</div>
+                                            <input value={form.profileImageAlt || ""} onChange={e => setForm({ ...form, profileImageAlt: e.target.value })} placeholder={form.schoolName || "Profil madrasah"} className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" data-testid="settings-profile-alt" />
+                                        </label>
+                                        <div className="text-xs text-slate-500 text-center relative">
+                                            <span className="bg-white px-3">atau</span>
+                                            <span className="absolute inset-x-0 top-1/2 -z-10 h-px bg-slate-200" />
+                                        </div>
+                                        <label className="block cursor-pointer">
+                                            <div className="border-2 border-dashed border-brand-200 rounded-xl p-6 text-center hover:bg-brand-50/40 transition">
+                                                <Upload className="w-5 h-5 text-brand-700 mx-auto" />
+                                                <div className="text-sm font-semibold text-brand-900 mt-2">Upload foto profil</div>
+                                                <div className="text-xs text-slate-500">JPG/PNG · Maks 4MB</div>
+                                            </div>
+                                            <input type="file" accept="image/*" className="hidden" onChange={onProfileFile} data-testid="settings-profile-file" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-3xl border border-slate-100 p-8">
+                                <h3 className="font-display font-bold text-xl text-brand-950 flex items-center gap-2"><Target className="w-5 h-5 text-brand-700" />Visi & Misi</h3>
+                                <p className="text-sm text-slate-600 mt-1">Konten ini tampil di halaman Profil publik.</p>
+                                <div className="mt-6 space-y-4">
+                                    <div>
+                                        <label className="text-sm font-semibold text-brand-950">Visi</label>
+                                        <textarea rows={3} value={form.vision || ""} onChange={e => setForm({ ...form, vision: e.target.value })} placeholder="Tuliskan visi madrasah..." className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 resize-none" data-testid="settings-vision" />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-semibold text-brand-950">Misi (1 baris = 1 poin)</label>
+                                        <textarea
+                                            rows={6}
+                                            value={Array.isArray(form.missions) ? form.missions.join("\n") : (form.missions || "")}
+                                            onChange={e => {
+                                                const lines = (e.target.value || "").split("\n").map((x) => x.trim()).filter(Boolean);
+                                                setForm({ ...form, missions: lines });
+                                            }}
+                                            placeholder="Tulis misi per baris..."
+                                            className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 resize-none"
+                                            data-testid="settings-missions"
+                                        />
                                     </div>
                                 </div>
                             </div>
