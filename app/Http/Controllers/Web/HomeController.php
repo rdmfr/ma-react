@@ -42,6 +42,7 @@ class HomeController extends Controller
         $programStudies = $this->fetchRecords('programStudies')->take(2)->values();
         $alumni = $this->fetchRecords('alumni')->values();
         $galleries = $this->fetchRecords('galleries')->take(6)->values();
+        $studentCount = Record::where('type', 'students')->count();
 
         return view('public.home', [
             'news' => $news,
@@ -51,6 +52,7 @@ class HomeController extends Controller
             'programStudies' => $programStudies,
             'alumni' => $alumni,
             'galleries' => $galleries,
+            'studentCount' => $studentCount,
         ]);
     }
 }

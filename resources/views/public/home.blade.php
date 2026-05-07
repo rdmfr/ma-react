@@ -78,8 +78,8 @@
                                     <i data-lucide="trophy" class="w-4 h-4"></i>
                                 </div>
                                 <div>
-                                    <div class="text-xs font-bold uppercase tracking-wider text-brand-700">Prestasi Terbaru</div>
-                                    <div class="text-sm font-semibold text-brand-950">Juara OSN Matematika Provinsi</div>
+                                    <div class="text-xs font-bold uppercase tracking-wider text-brand-700">{{ $branding['heroAchievementTitle'] ?? 'Prestasi Terbaru' }}</div>
+                                    <div class="text-sm font-semibold text-brand-950">{{ $branding['heroAchievementValue'] ?? 'Juara OSN Matematika Provinsi' }}</div>
                                 </div>
                             </div>
                         </div>
@@ -96,7 +96,7 @@
                                 @endforeach
                             </div>
                             <div class="text-xs text-brand-950">
-                                <span class="font-bold">842+ siswa</span> bersama kami tahun ini
+                                <span class="font-bold">{{ $studentCount }}+ siswa</span> bersama kami tahun ini
                             </div>
                         </div>
                     </div>
