@@ -1,0 +1,144 @@
+{
+  "project_name": "MA PULOSARI Version 3.0",
+  "archetype": "Organic & Earthy + Swiss Brutalist Authority",
+  "theme": "Light Theme (with Dark Green dominance for accents and hero)",
+  "color_palette": {
+    "primary": {
+      "dark": "#064e3b",
+      "light": "#10b981",
+      "gradient": "bg-gradient-to-r from-[#064e3b] to-[#10b981]",
+      "gradient_hover": "bg-gradient-to-r from-[#047857] to-[#34d399]"
+    },
+    "backgrounds": {
+      "body": "#fbfcf9",
+      "dashboard_bg": "#f4f5f1",
+      "surface": "#ffffff",
+      "glass": "bg-white/70"
+    },
+    "text": {
+      "heading": "#022c22",
+      "body": "#334155",
+      "muted": "#64748b",
+      "inverse": "#ffffff"
+    },
+    "state": {
+      "success": "#10b981",
+      "warning": "#f59e0b",
+      "error": "#ef4444",
+      "info": "#3b82f6"
+    },
+    "border": "#e2e8f0"
+  },
+  "typography": {
+    "fonts": {
+      "heading": "'Cabinet Grotesk', sans-serif",
+      "body": "'Plus Jakarta Sans', sans-serif"
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight font-bold text-[#022c22]",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-semibold text-[#022c22]",
+      "h3": "text-xl sm:text-2xl font-semibold text-[#022c22]",
+      "body": "text-base leading-relaxed text-[#334155]",
+      "small": "text-sm text-[#64748b]"
+    },
+    "google_fonts_import": "@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');"
+  },
+  "layout_and_spacing": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "bento_grid": "grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-6",
+    "dashboard_layout": "flex h-screen bg-[#f4f5f1] overflow-hidden",
+    "sidebar": "w-64 flex-shrink-0 bg-[#064e3b] text-white",
+    "main_content": "flex-1 overflow-y-auto p-6 lg:p-8"
+  },
+  "components": {
+    "cards": {
+      "base": "bg-white rounded-xl shadow-sm border border-[#e2e8f0] p-6 transition-all duration-200",
+      "hover": "hover:shadow-md hover:-translate-y-1 hover:border-[#10b981]/30",
+      "glass": "bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-2xl p-6"
+    },
+    "buttons": {
+      "primary": "inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#064e3b] to-[#10b981] px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-[#047857] hover:to-[#34d399] transition-all duration-200 focus:ring-2 focus:ring-[#10b981] focus:ring-offset-2",
+      "secondary": "inline-flex items-center justify-center rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-[#064e3b] shadow-sm border border-[#e2e8f0] hover:bg-gray-50 transition-all duration-200",
+      "outline": "inline-flex items-center justify-center rounded-lg border-2 border-[#10b981] px-6 py-2.5 text-sm font-semibold text-[#064e3b] hover:bg-[#10b981]/10 transition-all duration-200"
+    },
+    "inputs": {
+      "base": "w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-[#10b981] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+    },
+    "badges": {
+      "draft": "bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full text-xs font-medium",
+      "pending": "bg-yellow-100 text-yellow-800 px-2.5 py-0.5 rounded-full text-xs font-medium",
+      "approved": "bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-xs font-medium",
+      "rejected": "bg-red-100 text-red-800 px-2.5 py-0.5 rounded-full text-xs font-medium"
+    },
+    "shadcn_overrides": {
+      "radius": "0.75rem",
+      "primary": "153 100% 39%"
+    }
+  },
+  "pages": {
+    "public_home": {
+      "hero": "Split layout or centered text over a clean modern background. Heavy use of the dark green to light green gradient for CTA and typography accents. Include glassmorphism floating cards for stats (e.g. 'Akreditasi A').",
+      "features": "Bento grid layout for Highlights, Vision, Mission. Asymmetrical spacing with generous padding.",
+      "news_events": "Grid of news cards. Generous spacing (gap-8). Minimalist date badges.",
+      "teacher_grid": "Grid of teacher portraits. Use image zoom on hover.",
+      "gallery": "Grid with overlapping images, varied heights (masonry or bento) for album."
+    },
+    "auth_login": {
+      "layout": "Split screen (desktop). Left side: Beautiful green gradient bg-gradient-to-br from-[#064e3b] to-[#10b981] with dynamic abstract glass shapes and school branding. Right side: White background with login form centered.",
+      "form": "Clean input fields with subtle borders. Primary gradient button taking full width."
+    },
+    "admin_dashboard": {
+      "layout": "Sidebar (Dark Green #064e3b) + Top header (White, Glassy) layout.",
+      "branding": "CRITICAL: The logo and school name in the Sidebar/Header must pull from a global context/state that is editable in Settings.",
+      "settings_panel": "Dedicated settings page to upload a new Logo URL and School Name string. This updates the global branding via state management.",
+      "data_tables": "Use Shadcn Table components with action dropdowns, bulk select checkboxes, and distinct row hover states."
+    },
+    "teacher_dashboard": {
+      "layout": "Same sidebar/header layout as Admin, but restricted navigation.",
+      "grades_ui": "Spreadsheet-like dense table for grade input. Use Shadcn Table with minimal padding (p-1 or p-2) for dense data entry."
+    },
+    "osis_dashboard": {
+      "layout": "Same layout. Focus on card-based submissions and status badges (pending/approved) in lists."
+    }
+  },
+  "media": {
+    "images": [
+      {
+        "category": "hero_background",
+        "url": "https://images.unsplash.com/photo-1724490489101-5d1264d4d2e7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwYXJjaGl0ZWN0dXJlJTIwbW9kZXJuJTIwZ3JlZW58ZW58MHx8fHwxNzc3NjA3ODcwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Modern Islamic architecture tower, green elements"
+      },
+      {
+        "category": "students_learning",
+        "url": "https://images.unsplash.com/photo-1610208322247-18af7775da05?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHw0fHxhc2lhbiUyMGhpZ2glMjBzY2hvb2wlMjBzdHVkZW50cyUyMGxlYXJuaW5nfGVufDB8fHx8MTc3NzYwNzg3MHww&ixlib=rb-4.1.0&q=85",
+        "description": "Asian students learning, sitting together"
+      },
+      {
+        "category": "teacher_portrait",
+        "url": "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwzfHxhc2lhbiUyMHRlYWNoZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Nzc2MDc4NzB8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Asian teacher portrait (female)"
+      },
+      {
+        "category": "teacher_portrait_2",
+        "url": "https://images.unsplash.com/photo-1515994034738-1f437c226687?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwxfHxhc2lhbiUyMHRlYWNoZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3Nzc2MDc4NzB8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Asian teacher portrait (male)"
+      }
+    ],
+    "default_logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Ikhlas_beramal_logo.svg/1024px-Ikhlas_beramal_logo.svg.png"
+  },
+  "interactive_rules": {
+    "testing": "All interactive elements MUST include data-testid attributes (e.g., data-testid='submit-login-btn').",
+    "animations": "Use Framer Motion for page transitions. Stagger list items in bento grids.",
+    "hover_states": "Always ensure text contrast remains accessible on hover. Buttons must lighten slightly on hover."
+  },
+  "instructions_to_main_agent": [
+    "Use standard React with React Router DOM for routing.",
+    "Store the branding context (logo + school name) using React Context API or Zustand. Set default name to 'MA PULOSARI' and logo to default_logo provided.",
+    "Implement the gradient green as a core utility class and apply it heavily on Hero components and primary buttons.",
+    "Use Cabinet Grotesk for Headings and Plus Jakarta Sans for Body. Add custom font classes to Tailwind.",
+    "Implement Shadcn UI for standard components but override classes to inject glassmorphism where specified in cards.glass component logic.",
+    "DO NOT use raw <input> or <select>, always use Shadcn variants.",
+    "Ensure the Admin Settings page has a form that actually updates the Context state for Branding, so changes reflect immediately across the sidebar and header.",
+    "Build a robust sidebar navigation for dashboards with the Dark Green background."
+  ]
+}
