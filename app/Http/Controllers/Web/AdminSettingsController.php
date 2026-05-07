@@ -24,6 +24,14 @@ class AdminSettingsController extends Controller
         return $out;
     }
 
+    private function absoluteUrl(string $url): string
+    {
+        if ($url === '' || preg_match('/^https?:\/\//i', $url)) {
+            return $url;
+        }
+        return asset($url);
+    }
+
     public function edit()
     {
         $record = Record::query()
@@ -102,19 +110,19 @@ class AdminSettingsController extends Controller
         $logo = $request->file('logo');
         if ($logo) {
             $path = Storage::disk('public')->putFile('uploads/branding', $logo);
-            $data['logoUrl'] = Storage::url($path);
+            $data['logoUrl'] = $this->absoluteUrl(Storage::url($path));
         }
 
         $hero = $request->file('heroImage');
         if ($hero) {
             $path = Storage::disk('public')->putFile('uploads/branding', $hero);
-            $data['heroImageUrl'] = Storage::url($path);
+            $data['heroImageUrl'] = $this->absoluteUrl(Storage::url($path));
         }
 
         $profile = $request->file('profileImage');
         if ($profile) {
             $path = Storage::disk('public')->putFile('uploads/branding', $profile);
-            $data['profileImageUrl'] = Storage::url($path);
+            $data['profileImageUrl'] = $this->absoluteUrl(Storage::url($path));
         }
 
         $record->forceFill([

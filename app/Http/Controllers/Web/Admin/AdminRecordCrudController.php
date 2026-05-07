@@ -202,16 +202,10 @@ class AdminRecordCrudController extends Controller
 
     private function absolutePublicUrl(string $url): string
     {
-        if ($url === '') {
+        if ($url === '' || preg_match('/^https?:\/\//i', $url)) {
             return $url;
         }
-        if (preg_match('/^https?:\/\//i', $url)) {
-            return $url;
-        }
-        if (str_starts_with($url, '/')) {
-            return rtrim((string) config('app.url', ''), '/') . $url;
-        }
-        return $url;
+        return asset($url);
     }
 
     private function extractDataFromRequest(Request $request, array $module): array
