@@ -213,19 +213,22 @@
                                 @if ($input === 'textarea')
                                     <textarea name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm min-h-28" x-model="form['{{ $key }}']"></textarea>
                                 @elseif ($input === 'richtext')
-                                    <textarea id="rt-{{ $key }}" name="{{ $key }}" class="js-rich mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm" x-text="form['{{ $key }}'] ?? ''"></textarea>
+                                    <div class="mt-2" x-init="initRichEditor($el, '{{ $key }}')">
+                                        <textarea id="rt-{{ $key }}" name="{{ $key }}" class="js-rich w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm min-h-[300px]"></textarea>
+                                    </div>
                                 @elseif ($input === 'select')
-                                    <select name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm" x-model="form['{{ $key }}']">
+                                    <select name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm bg-white text-slate-900" x-model="form['{{ $key }}']">
+                                        <option value="">Pilih {{ $label }}</option>
                                         @if (is_array($options))
                                             @foreach ($options as $o)
-                                                <option value="{{ $o['value'] ?? '' }}">{{ $o['label'] ?? ($o['value'] ?? '') }}</option>
+                                                <option value="{{ $o['value'] ?? $o }}">{{ $o['label'] ?? ($o['value'] ?? $o) }}</option>
                                             @endforeach
                                         @endif
                                     </select>
                                 @elseif ($input === 'date')
-                                    <input type="date" name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm" x-model="form['{{ $key }}']" />
+                                    <input type="date" name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm bg-white text-slate-900" x-model="form['{{ $key }}']" />
                                 @elseif ($input === 'multifile')
-                                    <input type="file" name="{{ $key }}[]" multiple class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm" />
+                                    <input type="file" name="{{ $key }}[]" multiple class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm bg-white" />
                                     <template x-if="Array.isArray(form['{{ $key }}'] ?? null) && (form['{{ $key }}'] || []).length">
                                         <div class="mt-3 grid grid-cols-4 gap-2">
                                             <template x-for="(u, idx) in (form['{{ $key }}'] || []).slice(0, 8)" :key="idx">
@@ -236,12 +239,12 @@
                                         </div>
                                     </template>
                                 @elseif ($input === 'image' || $input === 'file')
-                                    <input type="file" name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm" />
+                                    <input type="file" name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm bg-white" />
                                     <template x-if="typeof (form['{{ $key }}'] ?? null) === 'string' && (form['{{ $key }}'] ?? '') !== ''">
-                                        <div class="mt-2 text-xs text-slate-500 truncate">File saat ini: <a class="text-brand-700 hover:text-brand-900" target="_blank" rel="noreferrer" x-bind:href="form['{{ $key }}']">Lihat</a></div>
+                                        <div class="mt-2 text-xs text-slate-500 truncate px-1">File saat ini: <a class="text-brand-700 hover:text-brand-900 font-bold" target="_blank" rel="noreferrer" x-bind:href="form['{{ $key }}']">Lihat Gambar</a></div>
                                     </template>
                                 @else
-                                    <input name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm" x-model="form['{{ $key }}']" />
+                                    <input name="{{ $key }}" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm bg-white text-slate-900" x-model="form['{{ $key }}']" />
                                 @endif
                             </div>
                         @endforeach
@@ -306,7 +309,12 @@
                 },
                 openEdit(row) {
                     this.modalTitle = 'Edit Data'
-                    this.form = Object.assign(blank(), row || {})
+                    // Ensure row data matches form keys and handle nulls
+                    const cleanRow = {}
+                    ;(fields || []).forEach(f => {
+                        if (f?.key) cleanRow[f.key] = row[f.key] ?? ''
+                    })
+                    this.form = cleanRow
                     this.formAction = routes.updateBase.replace('RECORD_ID', row.id)
                     this.methodSpoof = 'PUT'
                     this.modalOpen = true
@@ -325,8 +333,33 @@
                     if (!window.tinymce) return
                     richKeys.forEach((k) => {
                         const ed = window.tinymce.get('rt-' + k)
-                        if (!ed) return
-                        ed.setContent(this.form?.[k] || '')
+                        if (ed) {
+                            ed.setContent(this.form[k] || '')
+                        }
+                    })
+                },
+                initRichEditor(el, key) {
+                    if (!window.tinymce) return
+                    this.$nextTick(() => {
+                        // Remove existing instance if any
+                        if (window.tinymce.get('rt-' + key)) {
+                            window.tinymce.remove('#rt-' + key)
+                        }
+                        
+                        window.tinymce.init({
+                            selector: '#rt-' + key,
+                            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strike through | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                            height: 400,
+                            setup: (editor) => {
+                                editor.on('init', () => {
+                                    editor.setContent(this.form[key] || '')
+                                })
+                                editor.on('Change KeyUp Undo Redo', () => {
+                                    this.form[key] = editor.getContent()
+                                })
+                            }
+                        })
                     })
                 },
                 beforeSubmit() {
