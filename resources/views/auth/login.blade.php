@@ -78,11 +78,11 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('login.submit') }}" class="mt-7 space-y-5">
+                <form method="POST" action="{{ route('login.submit') }}" class="mt-7 space-y-5" x-data="{ email: @js(old('email', '')), password: '' }">
                     @csrf
                     <div>
                         <label class="block text-sm font-semibold text-brand-950 mb-2">Email</label>
-                        <input data-testid="login-email-input" type="email" required name="email" value="{{ old('email') }}" placeholder="nama@mapulosari.sch.id" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition">
+                        <input x-model="email" data-testid="login-email-input" type="email" required name="email" placeholder="nama@mapulosari.sch.id" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition">
                     </div>
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -90,7 +90,7 @@
                             <a href="/forgot-password" class="text-xs font-semibold text-brand-700 hover:text-brand-900">Lupa kata sandi?</a>
                         </div>
                         <div class="relative">
-                            <input data-testid="login-password-input" x-bind:type="show ? 'text' : 'password'" required name="password" placeholder="••••••••" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 pr-12 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition">
+                            <input x-model="password" data-testid="login-password-input" x-bind:type="show ? 'text' : 'password'" required name="password" placeholder="••••••••" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 pr-12 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition">
                             <button type="button" x-on:click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-700" data-testid="login-toggle-password">
                                 <i data-lucide="eye-off" class="w-4 h-4" x-show="show" x-cloak></i>
                                 <i data-lucide="eye" class="w-4 h-4" x-show="!show" x-cloak></i>
@@ -106,27 +106,22 @@
                     <button type="submit" data-testid="login-submit-btn" class="w-full inline-flex items-center justify-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white py-3.5 font-bold shadow-lg shadow-brand-900/20 transition">
                         Masuk <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
-                </form>
 
-                <div class="mt-8 rounded-2xl bg-brand-50/60 border border-brand-100 p-4" x-data="{ email: '', password: '' }" x-init="
-                    const emailEl = document.querySelector('input[name=email]')
-                    const passEl = document.querySelector('input[name=password]')
-                    $watch('email', v => { if (emailEl) emailEl.value = v })
-                    $watch('password', v => { if (passEl) passEl.value = v })
-                ">
-                    <div class="text-xs font-bold uppercase tracking-wider text-brand-700 mb-3">Demo Akun</div>
-                    <div class="space-y-1.5">
-                        @foreach ($demo as $c)
-                            <button type="button" x-on:click="email=@js($c['email']); password=@js($c['password'])" data-testid="demo-btn-{{ strtolower($c['role']) }}" class="w-full flex items-center justify-between text-left rounded-lg hover:bg-white px-3 py-2 transition">
-                                <div>
-                                    <span class="text-xs font-bold text-brand-950">{{ $c['role'] }}</span>
-                                    <div class="text-[11px] text-slate-600">{{ $c['email'] }}</div>
-                                </div>
-                                <span class="text-[10px] text-brand-700 font-semibold">Klik untuk isi →</span>
-                            </button>
-                        @endforeach
+                    <div class="mt-8 rounded-2xl bg-brand-50/60 border border-brand-100 p-4">
+                        <div class="text-xs font-bold uppercase tracking-wider text-brand-700 mb-3">Demo Akun</div>
+                        <div class="space-y-1.5">
+                            @foreach ($demo as $c)
+                                <button type="button" x-on:click="email=@js($c['email']); password=@js($c['password'])" data-testid="demo-btn-{{ strtolower($c['role']) }}" class="w-full flex items-center justify-between text-left rounded-lg hover:bg-white px-3 py-2 transition">
+                                    <div>
+                                        <span class="text-xs font-bold text-brand-950">{{ $c['role'] }}</span>
+                                        <div class="text-[11px] text-slate-600">{{ $c['email'] }}</div>
+                                    </div>
+                                    <span class="text-[10px] text-brand-700 font-semibold">Klik untuk isi →</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
+                </form>
 
                 <div class="mt-8 text-center text-sm text-slate-600">
                     Kembali ke <a href="/" class="font-bold text-brand-700 hover:text-brand-900">Beranda</a>

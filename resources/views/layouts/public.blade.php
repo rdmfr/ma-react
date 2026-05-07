@@ -74,6 +74,17 @@
             }
             .card-lift { transition: all 0.35s ease; }
             .card-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -15px rgba(6, 78, 59, 0.2); }
+
+            [x-cloak] { display: none !important; }
+
+            .page-enter {
+                animation: fadeIn 0.5s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
         </style>
 
         <script src="https://unpkg.com/lucide@latest"></script>

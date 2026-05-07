@@ -136,7 +136,7 @@
                     </div>
                 </div>
             </header>
-            <main class="flex-1 overflow-y-auto thin-scroll p-6 lg:p-8 page-enter" data-testid="dashboard-main">
+            <main class="flex-1 overflow-y-auto thin-scroll p-6 lg:p-10 page-enter" data-testid="dashboard-main">
                 @yield('dashboard')
             </main>
         </div>

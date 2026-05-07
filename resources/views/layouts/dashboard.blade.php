@@ -63,6 +63,17 @@
                 border: 1px solid rgba(255, 255, 255, 0.55);
                 box-shadow: 0 8px 32px rgba(6, 78, 59, 0.06);
             }
+
+            [x-cloak] { display: none !important; }
+
+            .page-enter {
+                animation: fadeIn 0.4s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(8px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
         </style>
 
         @stack('head')
