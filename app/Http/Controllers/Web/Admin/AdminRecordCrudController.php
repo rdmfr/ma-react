@@ -46,7 +46,7 @@ class AdminRecordCrudController extends Controller
             $query->where('data->' . $f['key'], $val);
         }
 
-        $p = $query->paginate(12)->withQueryString();
+        $p = $query->paginate(20)->withQueryString();
         $rows = collect($p->items())->map(function (Record $r) {
             $data = is_array($r->data) ? $r->data : [];
             return array_merge(['id' => $r->id, 'created_at' => $r->created_at, 'updated_at' => $r->updated_at], $data);
@@ -69,11 +69,71 @@ class AdminRecordCrudController extends Controller
                 'store' => route($routeBase . '.store', ['type' => $type]),
                 'updateBase' => route($routeBase . '.update', ['type' => $type, 'record' => 'RECORD_ID']),
                 'deleteBase' => route($routeBase . '.destroy', ['type' => $type, 'record' => 'RECORD_ID']),
+                'import' => $type === 'students' ? route('admin.students.import') : null,
+                'export' => $type === 'students' ? route('admin.students.export') : null,
             ],
             'q' => $q,
             'filters' => $filters,
             'rows' => $page,
         ]);
+    }
+
+    public function importStudents(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+        $header = fgetcsv($handle);
+
+        $count = 0;
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($header) !== count($row)) continue;
+            $data = array_combine($header, $row);
+            
+            Record::query()->create([
+                'type' => 'students',
+                'data' => $data,
+            ]);
+            $count++;
+        }
+        fclose($handle);
+
+        return redirect()->back()->with('success', "$count data siswa berhasil diimpor.");
+    }
+
+    public function exportStudents()
+    {
+        $records = Record::where('type', 'students')->get();
+        $filename = "students_" . date('Ymd_His') . ".csv";
+        
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $columns = ['nis', 'name', 'class', 'jurusan', 'status'];
+
+        $callback = function() use($records, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($records as $r) {
+                $row = [];
+                foreach ($columns as $col) {
+                    $row[] = $r->data[$col] ?? '';
+                }
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function store(Request $request, string $type)
@@ -276,19 +336,24 @@ class AdminRecordCrudController extends Controller
         $modules = [
             'teachers' => [
                 'title' => 'Manajemen Guru',
-                'subtitle' => 'Kelola data guru & staff.',
+                'description' => 'Kelola data guru & staff.',
+                'icon' => 'graduation-cap',
                 'search' => ['name', 'subject'],
-                'columns' => [
+                'table' => [
                     ['key' => 'name', 'label' => 'Nama'],
-                    ['key' => 'subject', 'label' => 'Mapel'],
-                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'subject', 'label' => 'Mata Pelajaran'],
+                    ['key' => 'status', 'label' => 'Status', 'badge' => ['approved' => 'emerald', 'pending' => 'amber', 'draft' => 'slate']],
                 ],
                 'fields' => [
-                    ['key' => 'name', 'label' => 'Nama', 'input' => 'text'],
-                    ['key' => 'slug', 'label' => 'Slug', 'input' => 'text'],
-                    ['key' => 'subject', 'label' => 'Mata Pelajaran', 'input' => 'text'],
-                    ['key' => 'bio', 'label' => 'Bio', 'input' => 'textarea'],
+                    ['key' => 'name', 'label' => 'Nama', 'input' => 'text', 'required' => true],
+                    ['key' => 'slug', 'label' => 'Slug', 'input' => 'text', 'required' => true],
+                    ['key' => 'subject', 'label' => 'Mata Pelajaran', 'input' => 'text', 'required' => true],
                     ['key' => 'photo', 'label' => 'Foto', 'input' => 'image'],
+                    ['key' => 'bio', 'label' => 'Bio Singkat', 'input' => 'textarea'],
+                    ['key' => 'is_featured', 'label' => 'Tampilkan di Beranda', 'input' => 'select', 'options' => [
+                        ['value' => 'true', 'label' => 'Ya'],
+                        ['value' => 'false', 'label' => 'Tidak'],
+                    ]],
                     ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
                         ['value' => 'approved', 'label' => 'Approved'],
                         ['value' => 'pending', 'label' => 'Pending'],
@@ -298,158 +363,96 @@ class AdminRecordCrudController extends Controller
             ],
             'students' => [
                 'title' => 'Manajemen Siswa',
-                'subtitle' => 'Kelola data siswa.',
-                'search' => ['name', 'nis', 'class'],
-                'columns' => [
+                'description' => 'Kelola data siswa, jurusan, dan kelas.',
+                'icon' => 'user-plus',
+                'search' => ['nis', 'name'],
+                'filters' => [
+                    ['key' => 'class', 'label' => 'Kelas', 'options' => ['X', 'XI', 'XII']],
+                    ['key' => 'jurusan', 'label' => 'Jurusan', 'options' => ['IPA', 'IAI']],
+                ],
+                'table' => [
                     ['key' => 'nis', 'label' => 'NIS'],
                     ['key' => 'name', 'label' => 'Nama'],
                     ['key' => 'class', 'label' => 'Kelas'],
+                    ['key' => 'jurusan', 'label' => 'Jurusan'],
+                    ['key' => 'status', 'label' => 'Status', 'badge' => ['Aktif' => 'emerald', 'Lulus' => 'blue', 'Pindah' => 'amber']],
                 ],
                 'fields' => [
-                    ['key' => 'nis', 'label' => 'NIS', 'input' => 'text'],
-                    ['key' => 'name', 'label' => 'Nama', 'input' => 'text'],
-                    ['key' => 'class', 'label' => 'Kelas', 'input' => 'text'],
-                    ['key' => 'photo', 'label' => 'Foto', 'input' => 'image'],
+                    ['key' => 'nis', 'label' => 'NIS', 'input' => 'text', 'required' => true],
+                    ['key' => 'name', 'label' => 'Nama Lengkap', 'input' => 'text', 'required' => true],
+                    ['key' => 'class', 'label' => 'Kelas', 'input' => 'select', 'options' => [
+                        ['value' => 'X', 'label' => 'X'],
+                        ['value' => 'XI', 'label' => 'XI'],
+                        ['value' => 'XII', 'label' => 'XII'],
+                    ], 'required' => true],
+                    ['key' => 'jurusan', 'label' => 'Jurusan', 'input' => 'select', 'options' => [
+                        ['value' => 'IPA', 'label' => 'IPA'],
+                        ['value' => 'IAI', 'label' => 'IAI (Agama)'],
+                    ], 'required' => true],
                     ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
-                        ['value' => 'approved', 'label' => 'Approved'],
-                        ['value' => 'pending', 'label' => 'Pending'],
-                        ['value' => 'draft', 'label' => 'Draft'],
-                    ]],
+                        ['value' => 'Aktif', 'label' => 'Aktif'],
+                        ['value' => 'Lulus', 'label' => 'Lulus'],
+                        ['value' => 'Pindah', 'label' => 'Pindah'],
+                    ], 'default' => 'Aktif'],
                 ],
             ],
             'subjects' => [
                 'title' => 'Mata Pelajaran',
-                'subtitle' => 'Kelola daftar mata pelajaran.',
-                'search' => ['name', 'group'],
-                'columns' => [
-                    ['key' => 'name', 'label' => 'Nama'],
-                    ['key' => 'group', 'label' => 'Kelompok'],
+                'description' => 'Kelola mata pelajaran dan pengampu.',
+                'icon' => 'book',
+                'table' => [
+                    ['key' => 'code', 'label' => 'Kode'],
+                    ['key' => 'name', 'label' => 'Nama Mapel'],
+                    ['key' => 'jurusan', 'label' => 'Jurusan'],
                 ],
                 'fields' => [
-                    ['key' => 'name', 'label' => 'Nama', 'input' => 'text'],
-                    ['key' => 'group', 'label' => 'Kelompok', 'input' => 'text'],
+                    ['key' => 'code', 'label' => 'Kode Mapel', 'input' => 'text', 'required' => true],
+                    ['key' => 'name', 'label' => 'Nama Mapel', 'input' => 'text', 'required' => true],
+                    ['key' => 'jurusan', 'label' => 'Jurusan', 'input' => 'select', 'options' => [
+                        ['value' => 'Umum', 'label' => 'Umum'],
+                        ['value' => 'IPA', 'label' => 'IPA'],
+                        ['value' => 'IAI', 'label' => 'IAI (Agama)'],
+                    ]],
+                    ['key' => 'teacher_id', 'label' => 'ID Guru Pengampu', 'input' => 'text'],
                 ],
             ],
             'academicYears' => [
                 'title' => 'Tahun Ajaran',
-                'subtitle' => 'Kelola tahun ajaran.',
-                'search' => ['label'],
-                'columns' => [
-                    ['key' => 'label', 'label' => 'Tahun Ajaran'],
-                    ['key' => 'active', 'label' => 'Aktif'],
+                'description' => 'Kelola periode akademik aktif.',
+                'icon' => 'calendar',
+                'table' => [
+                    ['key' => 'year', 'label' => 'Tahun'],
+                    ['key' => 'semester', 'label' => 'Semester'],
+                    ['key' => 'is_active', 'label' => 'Status', 'badge' => ['Aktif' => 'emerald', 'Nonaktif' => 'slate']],
                 ],
                 'fields' => [
-                    ['key' => 'label', 'label' => 'Label', 'input' => 'text'],
-                    ['key' => 'active', 'label' => 'Aktif', 'input' => 'select', 'options' => [
-                        ['value' => 'true', 'label' => 'Ya'],
-                        ['value' => 'false', 'label' => 'Tidak'],
+                    ['key' => 'year', 'label' => 'Tahun Ajaran', 'input' => 'text', 'placeholder' => '2026/2027', 'required' => true],
+                    ['key' => 'semester', 'label' => 'Semester', 'input' => 'select', 'options' => [
+                        ['value' => 'Ganjil', 'label' => 'Ganjil'],
+                        ['value' => 'Genap', 'label' => 'Genap'],
                     ]],
-                ],
-            ],
-            'classes' => [
-                'title' => 'Kelas',
-                'subtitle' => 'Kelola kelas.',
-                'search' => ['name', 'grade', 'homeroom'],
-                'columns' => [
-                    ['key' => 'name', 'label' => 'Nama'],
-                    ['key' => 'grade', 'label' => 'Tingkat'],
-                    ['key' => 'homeroom', 'label' => 'Wali Kelas'],
-                ],
-                'fields' => [
-                    ['key' => 'name', 'label' => 'Nama', 'input' => 'text'],
-                    ['key' => 'grade', 'label' => 'Tingkat', 'input' => 'text'],
-                    ['key' => 'homeroom', 'label' => 'Wali Kelas', 'input' => 'text'],
-                ],
-            ],
-            'scores' => [
-                'title' => 'Nilai',
-                'subtitle' => 'Kelola atau lihat data nilai.',
-                'search' => ['student', 'subject', 'class'],
-                'columns' => [
-                    ['key' => 'student', 'label' => 'Siswa'],
-                    ['key' => 'class', 'label' => 'Kelas'],
-                    ['key' => 'subject', 'label' => 'Mapel'],
-                    ['key' => 'score', 'label' => 'Nilai'],
-                ],
-                'fields' => [
-                    ['key' => 'student', 'label' => 'Siswa', 'input' => 'text'],
-                    ['key' => 'class', 'label' => 'Kelas', 'input' => 'text'],
-                    ['key' => 'subject', 'label' => 'Mapel', 'input' => 'text'],
-                    ['key' => 'score', 'label' => 'Nilai', 'input' => 'text'],
-                    ['key' => 'note', 'label' => 'Catatan', 'input' => 'textarea'],
-                ],
-            ],
-            'modules' => [
-                'title' => 'Modul',
-                'subtitle' => 'Kelola modul pembelajaran.',
-                'search' => ['title', 'subject', 'grade'],
-                'filters' => [
-                    ['key' => 'grade', 'label' => 'Tingkat'],
-                ],
-                'columns' => [
-                    ['key' => 'title', 'label' => 'Judul'],
-                    ['key' => 'subject', 'label' => 'Mapel'],
-                    ['key' => 'grade', 'label' => 'Tingkat'],
-                    ['key' => 'downloads', 'label' => 'Unduhan'],
-                    ['key' => 'status', 'label' => 'Status'],
-                ],
-                'fields' => [
-                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text'],
-                    ['key' => 'subject', 'label' => 'Mata Pelajaran', 'input' => 'text'],
-                    ['key' => 'grade', 'label' => 'Tingkat', 'input' => 'text'],
-                    ['key' => 'url', 'label' => 'File Modul (PDF/DOC)', 'input' => 'file'],
-                    ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
-                        ['value' => 'approved', 'label' => 'Approved'],
-                        ['value' => 'pending', 'label' => 'Pending'],
-                        ['value' => 'draft', 'label' => 'Draft'],
+                    ['key' => 'is_active', 'label' => 'Status Aktif', 'input' => 'select', 'options' => [
+                        ['value' => 'Aktif', 'label' => 'Aktif'],
+                        ['value' => 'Nonaktif', 'label' => 'Nonaktif'],
                     ]],
                 ],
             ],
             'news' => [
                 'title' => 'Berita',
-                'subtitle' => 'Kelola berita publik.',
-                'search' => ['title', 'category', 'author'],
-                'filters' => [
-                    ['key' => 'category', 'label' => 'Kategori', 'options' => array_map(fn ($c) => ['value' => $c, 'label' => $c], $categories)],
-                ],
-                'columns' => [
-                    ['key' => 'title', 'label' => 'Judul'],
-                    ['key' => 'category', 'label' => 'Kategori'],
-                    ['key' => 'views', 'label' => 'Views'],
-                    ['key' => 'status', 'label' => 'Status'],
-                ],
-                'fields' => [
-                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text'],
-                    ['key' => 'slug', 'label' => 'Slug', 'input' => 'text'],
-                    ['key' => 'category', 'label' => 'Kategori', 'input' => 'select', 'options' => array_map(fn ($c) => ['value' => $c, 'label' => $c], $categories)],
-                    ['key' => 'excerpt', 'label' => 'Ringkasan', 'input' => 'textarea'],
-                    ['key' => 'content', 'label' => 'Konten', 'input' => 'richtext'],
-                    ['key' => 'image', 'label' => 'Gambar Utama', 'input' => 'image'],
-                    ['key' => 'author', 'label' => 'Penulis', 'input' => 'text'],
-                    ['key' => 'date', 'label' => 'Tanggal', 'input' => 'date'],
-                    ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
-                        ['value' => 'approved', 'label' => 'Approved'],
-                        ['value' => 'pending', 'label' => 'Pending'],
-                        ['value' => 'draft', 'label' => 'Draft'],
-                    ]],
-                ],
-            ],
-            'reflections' => [
-                'title' => 'Refleksi',
-                'subtitle' => 'Kelola refleksi publik.',
+                'description' => 'Kelola berita dan artikel sekolah.',
+                'icon' => 'newspaper',
                 'search' => ['title', 'author'],
-                'columns' => [
+                'table' => [
                     ['key' => 'title', 'label' => 'Judul'],
                     ['key' => 'author', 'label' => 'Penulis'],
-                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'status', 'label' => 'Status', 'badge' => ['approved' => 'emerald', 'pending' => 'amber', 'draft' => 'slate']],
                 ],
                 'fields' => [
-                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text'],
-                    ['key' => 'slug', 'label' => 'Slug', 'input' => 'text'],
-                    ['key' => 'author', 'label' => 'Penulis', 'input' => 'text'],
-                    ['key' => 'date', 'label' => 'Tanggal', 'input' => 'date'],
+                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text', 'required' => true],
+                    ['key' => 'slug', 'label' => 'Slug', 'input' => 'text', 'required' => true],
+                    ['key' => 'author', 'label' => 'Penulis', 'input' => 'text', 'required' => true],
+                    ['key' => 'category', 'label' => 'Kategori', 'input' => 'select', 'options' => array_map(fn ($c) => ['value' => $c, 'label' => $c], $categories)],
                     ['key' => 'image', 'label' => 'Gambar', 'input' => 'image'],
-                    ['key' => 'excerpt', 'label' => 'Ringkasan', 'input' => 'textarea'],
                     ['key' => 'content', 'label' => 'Konten', 'input' => 'richtext'],
                     ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
                         ['value' => 'approved', 'label' => 'Approved'],
@@ -458,107 +461,65 @@ class AdminRecordCrudController extends Controller
                     ]],
                 ],
             ],
-            'announcements' => [
-                'title' => 'Pengumuman',
-                'subtitle' => 'Kelola pengumuman publik.',
-                'search' => ['title', 'content'],
-                'columns' => [
-                    ['key' => 'title', 'label' => 'Judul'],
-                    ['key' => 'pinned', 'label' => 'Pinned'],
-                    ['key' => 'status', 'label' => 'Status'],
+            'scores' => [
+                'title' => 'Nilai Siswa',
+                'description' => 'Kelola nilai mata pelajaran siswa.',
+                'icon' => 'award',
+                'search' => ['nis', 'subject'],
+                'table' => [
+                    ['key' => 'nis', 'label' => 'NIS'],
+                    ['key' => 'subject', 'label' => 'Mapel'],
+                    ['key' => 'score', 'label' => 'Nilai'],
+                    ['key' => 'semester', 'label' => 'Semester'],
                 ],
                 'fields' => [
-                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text'],
-                    ['key' => 'date', 'label' => 'Tanggal', 'input' => 'date'],
-                    ['key' => 'pinned', 'label' => 'Pinned', 'input' => 'select', 'options' => [
-                        ['value' => 'true', 'label' => 'Ya'],
-                        ['value' => 'false', 'label' => 'Tidak'],
+                    ['key' => 'nis', 'label' => 'NIS Siswa', 'input' => 'text', 'required' => true],
+                    ['key' => 'subject', 'label' => 'Mata Pelajaran', 'input' => 'text', 'required' => true],
+                    ['key' => 'score', 'label' => 'Nilai (0-100)', 'input' => 'text', 'required' => true],
+                    ['key' => 'semester', 'label' => 'Semester', 'input' => 'select', 'options' => [
+                        ['value' => 'Ganjil', 'label' => 'Ganjil'],
+                        ['value' => 'Genap', 'label' => 'Genap'],
                     ]],
-                    ['key' => 'content', 'label' => 'Konten', 'input' => 'richtext'],
-                    ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
-                        ['value' => 'approved', 'label' => 'Approved'],
-                        ['value' => 'pending', 'label' => 'Pending'],
-                        ['value' => 'draft', 'label' => 'Draft'],
-                    ]],
-                ],
-            ],
-            'events' => [
-                'title' => 'Agenda',
-                'subtitle' => 'Kelola agenda/events.',
-                'search' => ['title', 'location', 'type'],
-                'filters' => [
-                    ['key' => 'type', 'label' => 'Tipe'],
-                ],
-                'columns' => [
-                    ['key' => 'title', 'label' => 'Judul'],
-                    ['key' => 'date', 'label' => 'Tanggal'],
-                    ['key' => 'location', 'label' => 'Lokasi'],
-                    ['key' => 'status', 'label' => 'Status'],
-                ],
-                'fields' => [
-                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text'],
-                    ['key' => 'date', 'label' => 'Tanggal', 'input' => 'date'],
-                    ['key' => 'time', 'label' => 'Jam', 'input' => 'text'],
-                    ['key' => 'location', 'label' => 'Lokasi', 'input' => 'text'],
-                    ['key' => 'type', 'label' => 'Tipe', 'input' => 'text'],
-                    ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
-                        ['value' => 'approved', 'label' => 'Approved'],
-                        ['value' => 'pending', 'label' => 'Pending'],
-                        ['value' => 'draft', 'label' => 'Draft'],
-                    ]],
+                    ['key' => 'academic_year', 'label' => 'Tahun Ajaran', 'input' => 'text', 'placeholder' => '2026/2027'],
                 ],
             ],
             'galleries' => [
                 'title' => 'Galeri',
-                'subtitle' => 'Kelola galeri kegiatan.',
-                'search' => ['title', 'category'],
-                'filters' => [
-                    ['key' => 'category', 'label' => 'Kategori', 'options' => $extraCats],
-                ],
-                'columns' => [
+                'description' => 'Kelola album foto kegiatan.',
+                'icon' => 'image',
+                'table' => [
                     ['key' => 'title', 'label' => 'Judul'],
                     ['key' => 'category', 'label' => 'Kategori'],
-                    ['key' => 'count', 'label' => 'Foto'],
-                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'status', 'label' => 'Status', 'badge' => ['approved' => 'emerald', 'pending' => 'amber']],
                 ],
                 'fields' => [
-                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text'],
+                    ['key' => 'title', 'label' => 'Judul Album', 'input' => 'text', 'required' => true],
                     ['key' => 'category', 'label' => 'Kategori', 'input' => 'select', 'options' => $extraCats],
-                    ['key' => 'date', 'label' => 'Tanggal', 'input' => 'date'],
-                    ['key' => 'cover', 'label' => 'Cover', 'input' => 'image'],
-                    ['key' => 'photos', 'label' => 'Foto Album', 'input' => 'multifile'],
-                    ['key' => 'count', 'label' => 'Jumlah Foto', 'input' => 'text'],
+                    ['key' => 'cover', 'label' => 'Cover Album', 'input' => 'image'],
+                    ['key' => 'images', 'label' => 'Foto-foto', 'input' => 'multifile'],
                     ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
                         ['value' => 'approved', 'label' => 'Approved'],
                         ['value' => 'pending', 'label' => 'Pending'],
-                        ['value' => 'draft', 'label' => 'Draft'],
                     ]],
                 ],
             ],
             'studentWorks' => [
                 'title' => 'Karya Siswa',
-                'subtitle' => 'Kelola karya siswa.',
-                'search' => ['title', 'author', 'category'],
-                'filters' => [
-                    ['key' => 'category', 'label' => 'Kategori'],
-                ],
-                'columns' => [
+                'description' => 'Kelola portofolio karya siswa.',
+                'icon' => 'sparkles',
+                'table' => [
                     ['key' => 'title', 'label' => 'Judul'],
-                    ['key' => 'author', 'label' => 'Author'],
-                    ['key' => 'downloads', 'label' => 'Unduhan'],
-                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'author', 'label' => 'Siswa'],
+                    ['key' => 'status', 'label' => 'Status', 'badge' => ['approved' => 'emerald', 'pending' => 'amber']],
                 ],
                 'fields' => [
-                    ['key' => 'title', 'label' => 'Judul', 'input' => 'text'],
-                    ['key' => 'author', 'label' => 'Author', 'input' => 'text'],
-                    ['key' => 'category', 'label' => 'Kategori', 'input' => 'text'],
-                    ['key' => 'image', 'label' => 'Gambar', 'input' => 'image'],
-                    ['key' => 'url', 'label' => 'File Karya', 'input' => 'file'],
-                    ['key' => 'downloads', 'label' => 'Unduhan', 'input' => 'text'],
+                    ['key' => 'title', 'label' => 'Judul Karya', 'input' => 'text', 'required' => true],
+                    ['key' => 'author', 'label' => 'Nama Siswa', 'input' => 'text', 'required' => true],
+                    ['key' => 'image', 'label' => 'Foto Karya', 'input' => 'image'],
+                    ['key' => 'description', 'label' => 'Deskripsi', 'input' => 'textarea'],
                     ['key' => 'status', 'label' => 'Status', 'input' => 'select', 'options' => [
                         ['value' => 'approved', 'label' => 'Approved'],
                         ['value' => 'pending', 'label' => 'Pending'],
-                        ['value' => 'draft', 'label' => 'Draft'],
                     ]],
                 ],
             ],

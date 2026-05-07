@@ -9,6 +9,7 @@
                 ['label' => 'Program Studi', 'to' => '/program-studi'],
                 ['label' => 'Modul Pembelajaran', 'to' => '/modul'],
                 ['label' => 'Alumni', 'to' => '/alumni'],
+                ['label' => 'Cek Nilai Siswa', 'to' => '/cek-nilai'],
             ],
         ],
         [

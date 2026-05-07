@@ -9,6 +9,10 @@ use App\Http\Controllers\Web\AdminSettingsController;
 use App\Http\Controllers\Web\Admin\AdminRecordCrudController;
 use App\Http\Controllers\Web\Admin\AdminReportCardsController;
 use App\Http\Controllers\Web\Admin\AdminUsersController;
+use App\Http\Controllers\Web\Admin\AdminDashboardController;
+use App\Http\Controllers\Web\Admin\AdminApprovalController;
+use App\Http\Controllers\Web\TeacherDashboardController;
+use App\Http\Controllers\Web\OsisDashboardController;
 use App\Http\Controllers\Web\DashboardProfileController;
 
 /*
@@ -37,6 +41,8 @@ Route::get('/karya-siswa', [PublicController::class, 'karyaSiswa'])->name('karya
 Route::post('/karya-siswa/{record}/download', [PublicController::class, 'karyaSiswaDownload'])->name('karya-siswa.download');
 Route::get('/galeri', [PublicController::class, 'galeriIndex'])->name('galeri');
 Route::get('/galeri/{record}', [PublicController::class, 'galeriShow'])->name('galeri.show');
+Route::get('/cek-nilai', [PublicController::class, 'checkScores'])->name('public.check-scores');
+Route::post('/cek-nilai', [PublicController::class, 'searchScores'])->name('public.check-scores.search');
 Route::get('/agenda', [PublicController::class, 'agenda'])->name('agenda');
 
 Route::get('/berita', [PublicController::class, 'beritaIndex'])->name('berita.index');
@@ -65,7 +71,10 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/', fn () => view('dashboard.admin.overview'))->name('admin.home');
+    Route::get('/', AdminDashboardController::class)->name('admin.home');
+    Route::get('/approval', [AdminApprovalController::class, 'index'])->name('admin.approval');
+    Route::post('/approval/{record}/approve', [AdminApprovalController::class, 'approve'])->name('admin.approval.approve');
+    Route::post('/approval/{record}/reject', [AdminApprovalController::class, 'reject'])->name('admin.approval.reject');
 
     Route::post('/records/{type}/upload', [AdminRecordCrudController::class, 'upload'])->name('admin.records.upload');
     Route::post('/records/{type}', [AdminRecordCrudController::class, 'store'])->name('admin.records.store');
@@ -83,6 +92,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::delete('/teachers/{record}', [AdminRecordCrudController::class, 'destroy'])->defaults('type', 'teachers')->name('admin.teachers.destroy');
 
     Route::get('/students', [AdminRecordCrudController::class, 'index'])->defaults('type', 'students')->defaults('section', 'Admin')->name('admin.students');
+    Route::post('/students/import', [AdminRecordCrudController::class, 'importStudents'])->name('admin.students.import');
+    Route::get('/students/export', [AdminRecordCrudController::class, 'exportStudents'])->name('admin.students.export');
     Route::post('/students', [AdminRecordCrudController::class, 'store'])->defaults('type', 'students')->name('admin.students.store');
     Route::put('/students/{record}', [AdminRecordCrudController::class, 'update'])->defaults('type', 'students')->name('admin.students.update');
     Route::delete('/students/{record}', [AdminRecordCrudController::class, 'destroy'])->defaults('type', 'students')->name('admin.students.destroy');
@@ -175,7 +186,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 
 Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->group(function () {
-    Route::get('/', fn () => view('dashboard.teacher.overview'))->name('teacher.home');
+    Route::get('/', TeacherDashboardController::class)->name('teacher.home');
 
     Route::post('/records/{type}/upload', [AdminRecordCrudController::class, 'upload'])->name('teacher.records.upload');
     Route::post('/records/{type}', [AdminRecordCrudController::class, 'store'])->name('teacher.records.store');
@@ -211,7 +222,7 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->group(function (
 });
 
 Route::middleware(['auth', 'role:osis'])->prefix('osis')->group(function () {
-    Route::get('/', fn () => view('dashboard.osis.overview'))->name('osis.home');
+    Route::get('/', OsisDashboardController::class)->name('osis.home');
 
     Route::post('/records/{type}/upload', [AdminRecordCrudController::class, 'upload'])->name('osis.records.upload');
     Route::post('/records/{type}', [AdminRecordCrudController::class, 'store'])->name('osis.records.store');

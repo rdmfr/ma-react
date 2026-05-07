@@ -5,7 +5,7 @@
     $adminNav = [
         ['section' => 'Umum', 'items' => [
             ['to' => '/admin', 'label' => 'Ikhtisar', 'icon' => 'layout-dashboard'],
-            ['to' => '/admin/approval', 'label' => 'Antrian Persetujuan', 'icon' => 'clipboard-check'],
+            ['to' => '/admin/approval', 'label' => 'Persetujuan', 'icon' => 'clipboard-check'],
             ['to' => '/admin/notifications', 'label' => 'Notifikasi', 'icon' => 'bell'],
         ]],
         ['section' => 'Pengguna', 'items' => [
@@ -94,6 +94,12 @@
                                     <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-brand-400" x-show="{{ $isActive ? 'true' : 'false' }} && !collapsed" x-cloak></span>
                                     <i data-lucide="{{ $it['icon'] }}" class="w-[18px] h-[18px] shrink-0 {{ $isActive ? 'text-brand-400' : '' }}"></i>
                                     <span class="text-sm font-medium flex-1 truncate" x-show="!collapsed" x-cloak>{{ $it['label'] }}</span>
+                                    @if($it['to'] === '/admin/approval')
+                                        @php $pCount = \App\Models\Record::where('data->status', 'pending')->count(); @endphp
+                                        @if($pCount > 0)
+                                            <span class="ml-auto w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center" x-show="!collapsed" x-cloak>{{ $pCount }}</span>
+                                        @endif
+                                    @endif
                                 </a>
                             @endforeach
                         </div>

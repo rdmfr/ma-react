@@ -53,6 +53,7 @@ class AdminSettingsController extends Controller
             'facebook' => ['nullable', 'string', 'max:255'],
             'youtube' => ['nullable', 'string', 'max:255'],
             'mapEmbed' => ['nullable', 'string', 'max:5000'],
+            'seo_keywords' => ['nullable', 'string', 'max:1000'],
             'accentColor' => ['nullable', 'regex:/^#?[0-9a-fA-F]{6}$/'],
             'darkColor' => ['nullable', 'regex:/^#?[0-9a-fA-F]{6}$/'],
             'logo' => ['nullable', 'file', 'image', 'max:5120'],
@@ -79,6 +80,7 @@ class AdminSettingsController extends Controller
             'facebook' => $validated['facebook'] ?? null,
             'youtube' => $validated['youtube'] ?? null,
             'mapEmbed' => $validated['mapEmbed'] ?? null,
+            'seo_keywords' => $validated['seo_keywords'] ?? null,
             'accentColor' => isset($validated['accentColor']) ? ('#' . ltrim($validated['accentColor'], '#')) : null,
             'darkColor' => isset($validated['darkColor']) ? ('#' . ltrim($validated['darkColor'], '#')) : null,
         ]);

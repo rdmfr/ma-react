@@ -147,9 +147,9 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3">
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-6 py-3 text-sm font-bold">
-                    <i data-lucide="save" class="w-4 h-4"></i> Simpan Perubahan
+            <div class="mt-10 mb-20 flex items-center justify-end gap-3">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-8 py-4 text-base font-bold shadow-xl shadow-brand-900/20 card-lift">
+                    <i data-lucide="save" class="w-5 h-5"></i> Simpan Perubahan Branding
                 </button>
             </div>
         </form>

@@ -335,6 +335,36 @@ class PublicController extends Controller
         ]);
     }
 
+    public function checkScores()
+    {
+        return view('public.check-scores');
+    }
+
+    public function searchScores(Request $request)
+    {
+        $request->validate(['nis' => 'required|string']);
+        $nis = $request->nis;
+
+        $student = Record::where('type', 'students')
+            ->where('data->nis', $nis)
+            ->first();
+
+        if (!$student) {
+            return redirect()->back()->with('error', 'Data siswa tidak ditemukan.');
+        }
+
+        $scores = Record::where('type', 'scores')
+            ->where('data->nis', $nis)
+            ->get()
+            ->map(fn($r) => array_merge(['id' => $r->id], $r->data));
+
+        return view('public.check-scores', [
+            'student' => array_merge(['id' => $student->id], $student->data),
+            'scores' => $scores,
+            'nis' => $nis
+        ]);
+    }
+
     public function agenda(Request $request)
     {
         $q = trim((string) $request->query('q', ''));

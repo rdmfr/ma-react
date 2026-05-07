@@ -71,9 +71,25 @@
                 <div class="mt-2 text-sm text-slate-600">{{ $module['subtitle'] ?? '' }}</div>
             </div>
             <div class="flex items-center gap-3">
-                <button type="button" class="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-5 py-3 text-sm font-bold" x-on:click="openCreate()" data-testid="record-create-btn">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Tambah
+                <button type="button" class="inline-flex items-center gap-2 rounded-xl gradient-brand gradient-brand-hover text-white px-5 py-3 text-sm font-bold shadow-lg shadow-brand-900/10 transition card-lift" x-on:click="openCreate()" data-testid="record-create-btn">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Tambah {{ $module['title'] ?? 'Data' }}
                 </button>
+
+                @if($routes['export'] ?? null)
+                    <a href="{{ $routes['export'] }}" class="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 px-5 py-3 text-sm font-bold hover:bg-slate-50 transition">
+                        <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+                    </a>
+                @endif
+
+                @if($routes['import'] ?? null)
+                    <button type="button" x-on:click="$refs.importFile.click()" class="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 px-5 py-3 text-sm font-bold hover:bg-slate-50 transition">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Import CSV
+                    </button>
+                    <form action="{{ $routes['import'] }}" method="POST" enctype="multipart/form-data" class="hidden">
+                        @csrf
+                        <input type="file" x-ref="importFile" name="file" x-on:change="$el.form.submit()" accept=".csv">
+                    </form>
+                @endif
             </div>
         </div>
 
@@ -145,7 +161,7 @@
                                 @endforeach
                                 <td class="px-5 py-4">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button type="button" class="text-xs font-bold text-brand-700 hover:text-brand-900 px-3 py-2 rounded-lg hover:bg-brand-50" x-on:click='openEdit(@js($r))' data-testid="record-edit-{{ $r['id'] }}">Edit</button>
+                                        <button type="button" class="text-xs font-bold text-brand-700 hover:text-brand-900 px-3 py-2 rounded-lg hover:bg-brand-50" x-on:click="openEdit({{ htmlspecialchars(json_encode($r), ENT_QUOTES, 'UTF-8') }})" data-testid="record-edit-{{ $r['id'] }}">Edit</button>
                                         <button type="button" class="text-xs font-bold text-red-600 hover:text-red-800 px-3 py-2 rounded-lg hover:bg-red-50" x-on:click="confirmDelete('{{ $r['id'] }}')" data-testid="record-delete-{{ $r['id'] }}">Hapus</button>
                                     </div>
                                 </td>
