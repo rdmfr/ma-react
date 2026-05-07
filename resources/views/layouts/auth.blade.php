@@ -55,6 +55,20 @@
                 background: var(--app-bg);
                 color: var(--body);
             }
+
+            .font-display { font-family: 'Manrope', sans-serif; letter-spacing: -0.02em; }
+            .font-editorial { font-family: 'Fraunces', serif; }
+            .gradient-brand { background-image: linear-gradient(135deg, #064e3b 0%, #10b981 100%); }
+            .gradient-brand-hover:hover { background-image: linear-gradient(135deg, #047857 0%, #34d399 100%); }
+            .glass-dark {
+                background: rgba(2, 44, 34, 0.55);
+                backdrop-filter: blur(18px) saturate(140%);
+                -webkit-backdrop-filter: blur(18px) saturate(140%);
+                border: 1px solid rgba(16, 185, 129, 0.2);
+            }
+            .noise-overlay {
+                background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+            }
         </style>
 
         <script src="https://unpkg.com/lucide@latest"></script>

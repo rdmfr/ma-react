@@ -59,6 +59,7 @@
             .font-display { font-family: 'Manrope', sans-serif; letter-spacing: -0.02em; }
             .font-editorial { font-family: 'Fraunces', serif; }
             .gradient-brand { background-image: linear-gradient(135deg, #064e3b 0%, #10b981 100%); }
+            .gradient-brand-hover:hover { background-image: linear-gradient(135deg, #047857 0%, #34d399 100%); }
             .gradient-text {
                 background-image: linear-gradient(135deg, #064e3b 0%, #10b981 100%);
                 -webkit-background-clip: text;
