@@ -202,6 +202,10 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->group(function (
     Route::put('/scores/{record}', [AdminRecordCrudController::class, 'update'])->defaults('type', 'scores')->name('teacher.scores.update');
     Route::delete('/scores/{record}', [AdminRecordCrudController::class, 'destroy'])->defaults('type', 'scores')->name('teacher.scores.destroy');
 
+    // Berita & Refleksi for Teachers
+    Route::get('/news', [AdminRecordCrudController::class, 'index'])->defaults('type', 'news')->defaults('section', 'Guru')->defaults('routeBase', 'teacher.records')->name('teacher.news');
+    Route::get('/reflections', [AdminRecordCrudController::class, 'index'])->defaults('type', 'reflections')->defaults('section', 'Guru')->defaults('routeBase', 'teacher.records')->name('teacher.reflections');
+
     Route::get('/evaluations', [AdminRecordCrudController::class, 'index'])->defaults('type', 'evaluations')->defaults('section', 'Guru')->defaults('routeBase', 'teacher.records')->name('teacher.evaluations');
     Route::post('/evaluations', [AdminRecordCrudController::class, 'store'])->defaults('type', 'evaluations')->name('teacher.evaluations.store');
     Route::put('/evaluations/{record}', [AdminRecordCrudController::class, 'update'])->defaults('type', 'evaluations')->name('teacher.evaluations.update');

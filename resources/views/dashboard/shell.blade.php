@@ -34,12 +34,14 @@
     $teacherNav = [
         ['section' => 'Mengajar', 'items' => [
             ['to' => '/teacher', 'label' => 'Ikhtisar', 'icon' => 'layout-dashboard'],
+            ['to' => '/teacher/news', 'label' => 'Berita', 'icon' => 'newspaper'],
+            ['to' => '/teacher/reflections', 'label' => 'Refleksi', 'icon' => 'message-square'],
             ['to' => '/teacher/classes', 'label' => 'Kelas Saya', 'icon' => 'graduation-cap'],
-            ['to' => '/teacher/scores', 'label' => 'Input Nilai', 'icon' => 'file-bar-chart-2'],
+            ['to' => '/teacher/scores', 'label' => 'Input Nilai', 'icon' => 'award'],
             ['to' => '/teacher/evaluations', 'label' => 'Jadwal Evaluasi', 'icon' => 'calendar-range'],
         ]],
         ['section' => 'Konten', 'items' => [
-            ['to' => '/teacher/modules', 'label' => 'Unggah Modul', 'icon' => 'upload'],
+            ['to' => '/teacher/modules', 'label' => 'Modul Belajar', 'icon' => 'book-open'],
             ['to' => '/teacher/submissions', 'label' => 'Submisi Konten', 'icon' => 'file-check'],
         ]],
         ['section' => 'Akun', 'items' => [
@@ -143,6 +145,20 @@
                 </div>
             </header>
             <main class="flex-1 overflow-y-auto thin-scroll p-6 lg:p-10 page-enter" data-testid="dashboard-main">
+                @if(session('success'))
+                    <div class="mb-6 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl px-5 py-4 text-sm flex items-center gap-3 animate-fade-in">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-6 bg-red-50 border border-red-100 text-red-800 rounded-2xl px-5 py-4 text-sm flex items-center gap-3 animate-fade-in">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 @yield('dashboard')
             </main>
         </div>

@@ -285,10 +285,13 @@
         function recordCrud({ type, fields, routes }) {
             const richKeys = (fields || []).filter(f => f && f.input === 'richtext').map(f => f.key)
             const blank = () => {
-                const out = {}
-                ;(fields || []).forEach(f => { if (f?.key) out[f.key] = '' })
-                return out
+                const b = {}
+                fields.forEach((f) => {
+                    b[f.key] = f.default ?? ''
+                })
+                return b
             }
+
             return {
                 modalOpen: false,
                 deleteOpen: false,
@@ -303,13 +306,13 @@
                     this.formAction = routes.store
                     this.methodSpoof = null
                     this.modalOpen = true
-                    this.$nextTick(() => {
+                    // Small delay to ensure DOM is ready for TinyMCE
+                    setTimeout(() => {
                         this.resetRichEditors()
-                    })
+                    }, 50)
                 },
                 openEdit(row) {
                     this.modalTitle = 'Edit Data'
-                    // Ensure row data matches form keys and handle nulls
                     const cleanRow = {}
                     ;(fields || []).forEach(f => {
                         if (f?.key) cleanRow[f.key] = row[f.key] ?? ''
@@ -318,9 +321,10 @@
                     this.formAction = routes.updateBase.replace('RECORD_ID', row.id)
                     this.methodSpoof = 'PUT'
                     this.modalOpen = true
-                    this.$nextTick(() => {
+                    // Small delay to ensure DOM is ready for TinyMCE
+                    setTimeout(() => {
                         this.resetRichEditors()
-                    })
+                    }, 50)
                 },
                 closeModal() {
                     this.modalOpen = false

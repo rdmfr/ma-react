@@ -10,6 +10,18 @@
         <h1 class="font-display text-4xl font-extrabold text-brand-950 mt-2 tracking-tight">Pengaturan & Branding</h1>
         <p class="mt-3 text-sm text-slate-600">Kelola identitas sekolah, kontak, dan aset visual yang tampil di halaman publik.</p>
 
+        <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                tinymce.init({
+                    selector: '#profileContent',
+                    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strike through | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                    height: 500,
+                });
+            });
+        </script>
+
         @if (session('success'))
             <div class="mt-8 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl px-5 py-4 text-sm">{{ session('success') }}</div>
         @endif
@@ -78,6 +90,16 @@
                     <label class="block">
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Isi Prestasi Hero</div>
                         <input name="heroAchievementValue" value="{{ old('heroAchievementValue', $data['heroAchievementValue'] ?? ($branding['heroAchievementValue'] ?? 'Juara OSN Matematika Provinsi')) }}" class="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" placeholder="Juara OSN Matematika Provinsi">
+                    </label>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-slate-100 p-6">
+                <div class="font-display font-extrabold text-brand-950 text-xl">Profil Sekolah</div>
+                <div class="mt-6 space-y-5">
+                    <label class="block">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Konten Profil (Halaman Profil)</div>
+                        <textarea name="profileContent" id="profileContent" class="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 min-h-[300px]">{{ old('profileContent', $data['profileContent'] ?? ($branding['profileContent'] ?? '')) }}</textarea>
                     </label>
                 </div>
             </div>

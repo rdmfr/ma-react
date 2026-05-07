@@ -64,6 +64,7 @@ class AdminSettingsController extends Controller
             'seo_keywords' => ['nullable', 'string', 'max:1000'],
             'heroAchievementTitle' => ['nullable', 'string', 'max:255'],
             'heroAchievementValue' => ['nullable', 'string', 'max:255'],
+            'profileContent' => ['nullable', 'string'],
             'accentColor' => ['nullable', 'regex:/^#?[0-9a-fA-F]{6}$/'],
             'darkColor' => ['nullable', 'regex:/^#?[0-9a-fA-F]{6}$/'],
             'logo' => ['nullable', 'file', 'image', 'max:5120'],
@@ -93,6 +94,7 @@ class AdminSettingsController extends Controller
             'seo_keywords' => $validated['seo_keywords'] ?? null,
             'heroAchievementTitle' => $validated['heroAchievementTitle'] ?? null,
             'heroAchievementValue' => $validated['heroAchievementValue'] ?? null,
+            'profileContent' => $validated['profileContent'] ?? null,
             'accentColor' => isset($validated['accentColor']) ? ('#' . ltrim($validated['accentColor'], '#')) : null,
             'darkColor' => isset($validated['darkColor']) ? ('#' . ltrim($validated['darkColor'], '#')) : null,
         ]);
