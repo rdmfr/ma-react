@@ -59,6 +59,16 @@
             </div>
 
             <div class="bg-white rounded-3xl border border-slate-100 p-6">
+                <div class="font-display font-extrabold text-brand-950 text-xl">SEO & Meta</div>
+                <div class="mt-6 space-y-5">
+                    <label class="block">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Keywords (pisahkan dengan koma)</div>
+                        <input name="seo_keywords" value="{{ old('seo_keywords', $data['seo_keywords'] ?? ($branding['seo_keywords'] ?? '')) }}" class="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500" placeholder="sekolah, madrasah, garut, pendidikan">
+                    </label>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-slate-100 p-6">
                 <div class="font-display font-extrabold text-brand-950 text-xl">Kontak</div>
                 <div class="mt-6 grid md:grid-cols-2 gap-5">
                     <label class="block md:col-span-2">

@@ -3,6 +3,12 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="{{ $branding['schoolTagline'] ?? 'Madrasah Aliyah Berkarakter, Berilmu, Berakhlak' }}">
+        <meta name="keywords" content="{{ $branding['seo_keywords'] ?? 'sekolah, madrasah, aliyah, pendidikan' }}, {{ $branding['schoolName'] ?? 'MAS YPI Pulosari' }}">
+        <meta property="og:title" content="@yield('title', $branding['schoolName'] ?? 'Website')">
+        <meta property="og:description" content="{{ $branding['schoolTagline'] ?? 'Madrasah Aliyah Berkarakter, Berilmu, Berakhlak' }}">
+        <meta property="og:image" content="{{ $branding['logoUrl'] ?? '' }}">
+        <meta property="og:type" content="website">
         <title>@yield('title', $branding['schoolName'] ?? 'Website')</title>
 
         <!-- Tailwind CDN & Custom Config -->
