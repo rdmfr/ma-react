@@ -25,8 +25,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14" data-testid="profil-page">
         <div class="grid lg:grid-cols-12 gap-12 items-start">
             <div class="lg:col-span-5 lg:sticky lg:top-28">
-                <div class="text-xs font-bold uppercase tracking-[0.2em] text-brand-700"><span class="inline-block w-8 h-px bg-brand-500 mr-2 align-middle"></span>Tentang Kami</div>
-                <h1 class="font-display text-5xl lg:text-6xl font-black text-brand-950 mt-4 tracking-tight leading-[0.95]">Madrasah <span class="font-editorial italic text-brand-700">berakhlak</span> & berprestasi.</h1>
+                <div class="text-xs font-bold uppercase tracking-[0.2em] text-brand-700"><span class="inline-block w-8 h-px bg-accent-500 mr-2 align-middle"></span>Tentang Kami</div>
+                <h1 class="font-display text-5xl lg:text-6xl font-black text-brand-950 mt-4 tracking-tight leading-[0.95]">Madrasah <span class="font-editorial italic text-accent-600">berakhlak</span> & berprestasi.</h1>
                 <p class="mt-6 text-brand-800/85 leading-relaxed">{{ $branding['schoolName'] ?? '' }} berdiri sejak 1998, tumbuh sebagai madrasah aliyah berakreditasi {{ $branding['accreditationLabel'] ?? 'B' }} di Kab. Garut, Jawa Barat. Kami menggabungkan tradisi keilmuan Islam klasik dengan pendekatan pendidikan modern untuk mencetak lulusan yang siap berkontribusi di manapun.</p>
                 @if (isset($branding['profileContent']) && $branding['profileContent'] !== '')
                     <div class="mt-8 prose prose-brand prose-sm max-w-none text-brand-800/85 leading-relaxed">
@@ -36,7 +36,7 @@
                 <div class="mt-8 grid grid-cols-3 gap-3">
                     <div class="rounded-2xl bg-white border border-slate-100 p-4 card-lift"><div class="font-display font-black text-2xl text-brand-950">1998</div><div class="text-xs text-slate-600 mt-1">Berdiri</div></div>
                     <div class="rounded-2xl bg-white border border-slate-100 p-4 card-lift"><div class="font-display font-black text-2xl text-brand-950">{{ $branding['accreditationLabel'] ?? 'B' }}</div><div class="text-xs text-slate-600 mt-1">Akreditasi</div></div>
-                    <div class="rounded-2xl bg-white border border-slate-100 p-4 card-lift"><div class="font-display font-black text-2xl text-brand-950">842+</div><div class="text-xs text-slate-600 mt-1">Siswa</div></div>
+                    <div class="rounded-2xl bg-accent-50/60 border border-accent-100 p-4 card-lift"><div class="font-display font-black text-2xl text-accent-800">842+</div><div class="text-xs text-slate-700 mt-1">Siswa</div></div>
                 </div>
             </div>
             <div class="lg:col-span-7 space-y-6">
@@ -100,4 +100,3 @@
         </div>
     </div>
 @endsection
-

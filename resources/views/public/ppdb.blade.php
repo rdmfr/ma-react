@@ -20,8 +20,8 @@
             <div class="absolute inset-0 noise-overlay opacity-30"></div>
             <div class="absolute top-0 right-0 w-[30rem] h-[30rem] rounded-full bg-brand-400/20 blur-3xl"></div>
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                <div class="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/15 px-4 py-1.5 text-xs font-semibold"><i data-lucide="sparkles" class="w-3 h-3 text-brand-300"></i> PPDB 2025/2026 Dibuka</div>
-                <h1 class="font-display text-5xl lg:text-7xl font-black mt-5 tracking-tight leading-[0.95] text-white">Bergabung dengan<br><span class="font-editorial italic text-brand-300">keluarga besar</span> kami.</h1>
+                <div class="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/15 px-4 py-1.5 text-xs font-semibold"><i data-lucide="sparkles" class="w-3 h-3 text-accent-300"></i> PPDB 2025/2026 Dibuka</div>
+                <h1 class="font-display text-5xl lg:text-7xl font-black mt-5 tracking-tight leading-[0.95] text-white">Bergabung dengan<br><span class="font-editorial italic text-accent-300">keluarga besar</span> kami.</h1>
                 <p class="mt-5 max-w-2xl text-brand-100/85">Pendaftaran Peserta Didik Baru telah dibuka. Tersedia jalur reguler, prestasi, dan beasiswa untuk siswa berprestasi.</p>
             </div>
         </section>
@@ -30,10 +30,10 @@
             <div class="lg:col-span-4">
                 <h2 class="font-display text-3xl font-extrabold text-brand-950">Linimasa PPDB</h2>
                 <div class="mt-8 space-y-6 relative">
-                    <div class="absolute left-[15px] top-2 bottom-2 w-px bg-brand-200"></div>
+                    <div class="absolute left-[15px] top-2 bottom-2 w-px bg-accent-200"></div>
                     @foreach ($timeline as $i => $t)
                         <div class="flex gap-4 relative">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 {{ $t['active'] ? 'gradient-brand text-white' : 'bg-white border border-brand-200 text-brand-600' }}">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 {{ $t['active'] ? 'gradient-accent text-white' : 'bg-white border border-accent-200 text-accent-700' }}">
                                 @if ($t['active'])
                                     <i data-lucide="check" class="w-4 h-4"></i>
                                 @else
@@ -47,8 +47,8 @@
                         </div>
                     @endforeach
                 </div>
-                <div class="mt-10 bg-brand-50/60 border border-brand-100 rounded-2xl p-5">
-                    <div class="inline-flex items-center gap-2 text-brand-700 text-xs font-bold uppercase tracking-wider mb-2"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> Dokumen yang dibutuhkan</div>
+                <div class="mt-10 bg-accent-50/60 border border-accent-100 rounded-2xl p-5">
+                    <div class="inline-flex items-center gap-2 text-accent-700 text-xs font-bold uppercase tracking-wider mb-2"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> Dokumen yang dibutuhkan</div>
                     <ul class="text-sm text-brand-900 space-y-1.5">
                         <li>• Fotokopi Akte Kelahiran</li>
                         <li>• Fotokopi Kartu Keluarga</li>
@@ -62,10 +62,10 @@
             <div class="lg:col-span-8">
                 @if ($done)
                     <div class="bg-white rounded-3xl border border-brand-200 p-12 text-center">
-                        <div class="w-20 h-20 mx-auto rounded-full gradient-brand text-white flex items-center justify-center"><i data-lucide="check-circle-2" class="w-10 h-10"></i></div>
+                        <div class="w-20 h-20 mx-auto rounded-full gradient-accent text-white flex items-center justify-center"><i data-lucide="check-circle-2" class="w-10 h-10"></i></div>
                         <h3 class="font-display text-3xl font-black text-brand-950 mt-6">Pendaftaran Berhasil!</h3>
-                        <p class="text-slate-600 mt-3 max-w-md mx-auto">Terima kasih, <strong>{{ $ppdbName !== '' ? $ppdbName : 'calon siswa' }}</strong>. Tim PPDB akan menghubungi Anda dalam 1×24 jam melalui email <strong class="text-brand-800">{{ $ppdbEmail !== '' ? $ppdbEmail : 'Anda' }}</strong>.</p>
-                        <div class="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-50 border border-brand-100 px-5 py-2.5 text-sm font-bold text-brand-800">No. Pendaftaran: {{ $ppdbNo }}</div>
+                        <p class="text-slate-600 mt-3 max-w-md mx-auto">Terima kasih, <strong>{{ $ppdbName !== '' ? $ppdbName : 'calon siswa' }}</strong>. Tim PPDB akan menghubungi Anda dalam 1×24 jam melalui email <strong class="text-accent-700">{{ $ppdbEmail !== '' ? $ppdbEmail : 'Anda' }}</strong>.</p>
+                        <div class="mt-8 inline-flex items-center gap-2 rounded-full bg-accent-50 border border-accent-100 px-5 py-2.5 text-sm font-bold text-accent-800">No. Pendaftaran: {{ $ppdbNo }}</div>
                     </div>
                 @else
                     <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden" x-data="{
@@ -94,7 +94,7 @@
                             <div class="flex items-center justify-between gap-4 mb-4 flex-wrap">
                                 @foreach ([1 => ['title' => 'Data Diri', 'icon' => 'user'], 2 => ['title' => 'Data Orang Tua', 'icon' => 'users'], 3 => ['title' => 'Pilih Program', 'icon' => 'graduation-cap'], 4 => ['title' => 'Upload Dokumen', 'icon' => 'upload']] as $id => $s)
                                     <div class="flex items-center gap-2 flex-1 min-w-fit">
-                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold transition" x-bind:class="step > {{ $id }} ? 'gradient-brand text-white' : (step === {{ $id }} ? 'bg-brand-950 text-white' : 'bg-slate-100 text-slate-500')">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold transition" x-bind:class="step > {{ $id }} ? 'gradient-accent text-white' : (step === {{ $id }} ? 'bg-brand-950 text-white' : 'bg-slate-100 text-slate-500')">
                                             <i data-lucide="check" class="w-4 h-4" x-show="step > {{ $id }}" x-cloak></i>
                                             <i data-lucide="{{ $s['icon'] }}" class="w-4 h-4" x-show="step <= {{ $id }}" x-cloak></i>
                                         </div>
@@ -102,7 +102,7 @@
                                             <div class="text-xs font-bold" x-bind:class="step >= {{ $id }} ? 'text-brand-950' : 'text-slate-500'">{{ $s['title'] }}</div>
                                         </div>
                                         @if ($id < 4)
-                                            <div class="hidden md:block flex-1 h-0.5" x-bind:class="step > {{ $id }} ? 'bg-brand-500' : 'bg-slate-200'"></div>
+                                            <div class="hidden md:block flex-1 h-0.5" x-bind:class="step > {{ $id }} ? 'bg-accent-500' : 'bg-slate-200'"></div>
                                         @endif
                                     </div>
                                 @endforeach
@@ -110,7 +110,7 @@
                         </div>
 
                         <div class="p-7">
-                            <div class="text-xs font-bold uppercase tracking-[0.2em] text-brand-700" x-text="`Langkah ${step} / 4`"></div>
+                            <div class="text-xs font-bold uppercase tracking-[0.2em] text-accent-700" x-text="`Langkah ${step} / 4`"></div>
                             <h3 class="font-display text-2xl font-extrabold text-brand-950 mt-1" x-text="step === 1 ? 'Data Diri' : step === 2 ? 'Data Orang Tua' : step === 3 ? 'Pilih Program' : 'Upload Dokumen'"></h3>
                             <p class="text-sm text-slate-600 mt-1" x-text="step === 1 ? 'Informasi pribadi calon siswa' : step === 2 ? 'Informasi wali murid' : step === 3 ? 'Peminatan & jalur masuk' : 'Berkas pendukung'"></p>
 
@@ -120,8 +120,8 @@
                                     <div>
                                         <label class="text-sm font-semibold text-brand-950">Jenis Kelamin</label>
                                         <div class="mt-1.5 flex gap-2">
-                                            <button type="button" x-on:click="form.gender='L'" class="flex-1 rounded-xl py-3 text-sm font-semibold" x-bind:class="form.gender === 'L' ? 'gradient-brand text-white' : 'bg-white border border-slate-200 text-brand-900'">Laki-laki</button>
-                                            <button type="button" x-on:click="form.gender='P'" class="flex-1 rounded-xl py-3 text-sm font-semibold" x-bind:class="form.gender === 'P' ? 'gradient-brand text-white' : 'bg-white border border-slate-200 text-brand-900'">Perempuan</button>
+                                            <button type="button" x-on:click="form.gender='L'" class="flex-1 rounded-xl py-3 text-sm font-semibold" x-bind:class="form.gender === 'L' ? 'gradient-accent text-white' : 'bg-white border border-slate-200 text-brand-900'">Laki-laki</button>
+                                            <button type="button" x-on:click="form.gender='P'" class="flex-1 rounded-xl py-3 text-sm font-semibold" x-bind:class="form.gender === 'P' ? 'gradient-accent text-white' : 'bg-white border border-slate-200 text-brand-900'">Perempuan</button>
                                         </div>
                                     </div>
                                     <div><label class="text-sm font-semibold text-brand-950">Asal Sekolah</label><input x-model="form.school" class="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500"></div>
@@ -144,7 +144,7 @@
                                         <label class="text-sm font-semibold text-brand-950">Program Peminatan</label>
                                         <div class="mt-2 grid sm:grid-cols-3 gap-3">
                                             @foreach (['MIPA', 'IPS', 'Keagamaan'] as $p)
-                                                <button type="button" x-on:click="form.program='{{ $p }}'" class="relative rounded-2xl p-5 text-left transition" x-bind:class="form.program === '{{ $p }}' ? 'gradient-brand text-white' : 'bg-white border border-slate-200 text-brand-900 hover:bg-brand-50'" data-testid="ppdb-program-{{ $p }}">
+                                                <button type="button" x-on:click="form.program='{{ $p }}'" class="relative rounded-2xl p-5 text-left transition" x-bind:class="form.program === '{{ $p }}' ? 'gradient-accent text-white' : 'bg-white border border-slate-200 text-brand-900 hover:bg-accent-50'" data-testid="ppdb-program-{{ $p }}">
                                                     <i data-lucide="check" class="absolute top-3 right-3 w-4 h-4" x-show="form.program === '{{ $p }}'" x-cloak></i>
                                                     <div class="font-display font-extrabold text-lg">{{ $p }}</div>
                                                     <div class="text-xs mt-1" x-bind:class="form.program === '{{ $p }}' ? 'text-brand-100' : 'text-slate-600'">
@@ -158,9 +158,9 @@
                                         <label class="text-sm font-semibold text-brand-950">Jalur Masuk</label>
                                         <div class="mt-2 grid sm:grid-cols-3 gap-3">
                                             @foreach ([['k' => 'Reguler', 'd' => 'Tes akademik'], ['k' => 'Prestasi', 'd' => 'Lampirkan sertifikat'], ['k' => 'Beasiswa', 'd' => 'Khusus tidak mampu']] as $r)
-                                                <button type="button" x-on:click="form.route='{{ $r['k'] }}'" class="rounded-2xl p-4 text-left" x-bind:class="form.route === '{{ $r['k'] }}' ? 'bg-brand-950 text-white' : 'bg-white border border-slate-200 text-brand-900'">
+                                                <button type="button" x-on:click="form.route='{{ $r['k'] }}'" class="rounded-2xl p-4 text-left" x-bind:class="form.route === '{{ $r['k'] }}' ? 'bg-accent-700 text-white' : 'bg-white border border-slate-200 text-brand-900'">
                                                     <div class="font-display font-bold">{{ $r['k'] }}</div>
-                                                    <div class="text-xs mt-0.5" x-bind:class="form.route === '{{ $r['k'] }}' ? 'text-brand-300' : 'text-slate-600'">{{ $r['d'] }}</div>
+                                                    <div class="text-xs mt-0.5" x-bind:class="form.route === '{{ $r['k'] }}' ? 'text-accent-200' : 'text-slate-600'">{{ $r['d'] }}</div>
                                                 </button>
                                             @endforeach
                                         </div>
@@ -169,14 +169,14 @@
 
                             <div class="mt-6 space-y-3" x-show="step === 4" x-cloak data-testid="ppdb-step-4">
                                     @foreach (['Akte Kelahiran', 'Kartu Keluarga', 'Pas Foto 3x4', 'Ijazah / SKL'] as $f)
-                                        <label class="block border-2 border-dashed border-brand-200 rounded-xl p-5 bg-brand-50/40 cursor-pointer hover:bg-brand-50">
+                                        <label class="block border-2 border-dashed border-accent-200 rounded-xl p-5 bg-accent-50/40 cursor-pointer hover:bg-accent-50">
                                             <div class="flex items-center gap-3">
-                                                <i data-lucide="upload" class="w-5 h-5 text-brand-700"></i>
+                                                <i data-lucide="upload" class="w-5 h-5 text-accent-700"></i>
                                                 <div class="flex-1">
                                                     <div class="font-semibold text-brand-950 text-sm">{{ $f }}</div>
                                                     <div class="text-xs text-slate-600">PDF/JPG/PNG · Maks 5MB</div>
                                                 </div>
-                                                <span class="text-xs font-bold text-brand-700">Pilih file</span>
+                                                <span class="text-xs font-bold text-accent-700">Pilih file</span>
                                             </div>
                                             <input type="file" class="hidden">
                                         </label>
@@ -187,14 +187,14 @@
                         <div class="px-7 py-4 border-t border-slate-100 flex justify-between items-center">
                             <button type="button" x-on:click="prev()" x-bind:disabled="step === 1" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-brand-900 disabled:opacity-30" data-testid="ppdb-prev"><i data-lucide="arrow-left" class="w-4 h-4"></i>Kembali</button>
                             <div class="text-xs text-slate-500" x-text="`${step}/4`"></div>
-                            <button type="button" x-on:click="next()" class="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-6 py-3 text-sm font-bold" data-testid="ppdb-next" x-show="step < 4" x-cloak>Lanjut<i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                            <button type="button" x-on:click="next()" class="inline-flex items-center gap-2 rounded-xl gradient-accent gradient-accent-hover text-white px-6 py-3 text-sm font-bold shadow-lg shadow-black/10 transition" data-testid="ppdb-next" x-show="step < 4" x-cloak>Lanjut<i data-lucide="arrow-right" class="w-4 h-4"></i></button>
                             <form method="POST" action="{{ route('ppdb.submit') }}" x-show="step === 4" x-cloak>
                                 @csrf
                                 <input type="hidden" name="name" x-bind:value="form.name">
                                 <input type="hidden" name="school" x-bind:value="form.school">
                                 <input type="hidden" name="phone" x-bind:value="form.phone">
                                 <input type="hidden" name="email" x-bind:value="form.email">
-                                <button type="submit" class="inline-flex items-center gap-2 rounded-xl gradient-brand text-white px-6 py-3 text-sm font-bold" data-testid="ppdb-submit">Kirim Pendaftaran<i data-lucide="check" class="w-4 h-4"></i></button>
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-xl gradient-accent gradient-accent-hover text-white px-6 py-3 text-sm font-bold shadow-lg shadow-black/10 transition" data-testid="ppdb-submit">Kirim Pendaftaran<i data-lucide="check" class="w-4 h-4"></i></button>
                             </form>
                         </div>
                     </div>
