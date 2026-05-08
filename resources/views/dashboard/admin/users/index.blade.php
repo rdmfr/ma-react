@@ -95,14 +95,19 @@
                                 <td class="px-5 py-4 text-slate-600 text-xs">{{ $last }}</td>
                                 <td class="px-5 py-4">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button type="button" class="text-xs font-bold text-brand-700 hover:text-brand-900 px-3 py-2 rounded-lg hover:bg-brand-50" x-on:click='openEdit(@js([
-                                            "id" => $u->id,
-                                            "name" => $u->name,
-                                            "email" => $u->email,
-                                            "role" => $u->role,
-                                            "status" => $u->status,
-                                            "avatar_url" => $u->avatar_url,
-                                        ]))' data-testid="user-edit-{{ $u->id }}">Edit</button>
+                                        <button
+                                            type="button"
+                                            class="text-xs font-bold text-brand-700 hover:text-brand-900 px-3 py-2 rounded-lg hover:bg-brand-50"
+                                            x-on:click="openEdit({{ htmlspecialchars(json_encode([
+                                                'id' => $u->id,
+                                                'name' => $u->name,
+                                                'email' => $u->email,
+                                                'role' => $u->role ?? 'teacher',
+                                                'status' => $u->status ?? 'active',
+                                                'avatar_url' => $u->avatar_url,
+                                            ]), ENT_QUOTES, 'UTF-8') }})"
+                                            data-testid="user-edit-{{ $u->id }}"
+                                        >Edit</button>
                                         <button type="button" class="text-xs font-bold text-red-600 hover:text-red-800 px-3 py-2 rounded-lg hover:bg-red-50" x-on:click="confirmDelete('{{ $u->id }}')" data-testid="user-delete-{{ $u->id }}">Hapus</button>
                                     </div>
                                 </td>
@@ -261,4 +266,3 @@
         }
     </script>
 @endsection
-
