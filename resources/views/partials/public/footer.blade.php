@@ -58,7 +58,7 @@
             <span>© {{ now()->year }} {{ $branding['schoolName'] ?? '' }}. Semua hak dilindungi.</span>
             <span class="inline-flex items-center gap-1.5">
                 Dibangun dengan ikhlas oleh
-                <a href="https://wa.me/628988285622" target="_blank" class="font-display font-bold text-brand-200 hover:text-white tracking-tight transition-colors" data-testid="footer-rddev-credit">
+                <a href="https://wa.me/628988285622" target="_blank" class="font-display font-bold text-brand-200 hover:text-accent-200 tracking-tight transition-colors" data-testid="footer-rddev-credit">
                     RdDev.<span class="text-brand-400">.</span>
                 </a>
             </span>

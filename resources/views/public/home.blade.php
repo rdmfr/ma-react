@@ -40,9 +40,9 @@
                 <div class="grid lg:grid-cols-12 gap-10 items-center">
                     <div class="lg:col-span-7 animate-fade-up">
                         <div class="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 px-4 py-1.5 text-xs font-semibold tracking-wide">
-                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-300"></i>
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-accent-300"></i>
                             PPDB 2025/2026 Telah Dibuka
-                            <a href="/ppdb" class="text-brand-300 hover:text-white inline-flex items-center gap-1">Daftar <i data-lucide="arrow-up-right" class="w-3 h-3"></i></a>
+                            <a href="/ppdb" class="text-accent-300 hover:text-white inline-flex items-center gap-1">Daftar <i data-lucide="arrow-up-right" class="w-3 h-3"></i></a>
                         </div>
                         <h1 class="font-display mt-6 text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95] text-white">
                             Tumbuh cerdas,<br>berakhlak di <span class="font-editorial italic font-semibold text-brand-300 whitespace-nowrap">{{ $branding['schoolShort'] ?? '' }}</span>.
@@ -51,7 +51,7 @@
                             {{ $branding['schoolName'] ?? '' }} adalah madrasah berakreditasi {{ $branding['accreditationLabel'] ?? 'B' }} yang memadukan keilmuan modern dengan nilai-nilai Islam — membentuk generasi pembelajar sepanjang hayat.
                         </p>
                         <div class="mt-9 flex flex-wrap gap-3">
-                            <a href="/ppdb" data-testid="hero-cta-ppdb" class="inline-flex items-center gap-2 rounded-full bg-white text-brand-950 px-6 py-3.5 text-sm font-bold hover:bg-brand-100 transition">
+                            <a href="/ppdb" data-testid="hero-cta-ppdb" class="inline-flex items-center gap-2 rounded-full gradient-accent gradient-accent-hover text-white px-6 py-3.5 text-sm font-bold shadow-lg shadow-black/20 transition card-lift">
                                 Daftar Sekarang <i data-lucide="arrow-right" class="w-4 h-4"></i>
                             </a>
                             <a href="/profil" data-testid="hero-cta-profil" class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 backdrop-blur-md px-6 py-3.5 text-sm font-bold hover:bg-white/10 transition">
@@ -74,11 +74,11 @@
                             <img src="{{ $branding['heroImageUrl'] ?? '' }}" alt="{{ $branding['heroImageAlt'] ?? 'Kegiatan siswa' }}" class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-brand-950/70 to-transparent"></div>
                             <div class="absolute bottom-5 left-5 right-5 glass rounded-2xl p-4 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white">
+                                <div class="w-10 h-10 rounded-full gradient-accent flex items-center justify-center text-white">
                                     <i data-lucide="trophy" class="w-4 h-4"></i>
                                 </div>
                                 <div>
-                                    <div class="text-xs font-bold uppercase tracking-wider text-brand-700">{{ $branding['heroAchievementTitle'] ?? 'Prestasi Terbaru' }}</div>
+                                    <div class="text-xs font-bold uppercase tracking-wider text-accent-700">{{ $branding['heroAchievementTitle'] ?? 'Prestasi Terbaru' }}</div>
                                     <div class="text-sm font-semibold text-brand-950">{{ $branding['heroAchievementValue'] ?? 'Juara OSN Matematika Provinsi' }}</div>
                                 </div>
                             </div>

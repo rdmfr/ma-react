@@ -80,7 +80,7 @@
                         @php
                             $active = request()->is(ltrim($it['to'], '/')) || (request()->path() === '/' && $it['to'] === '/');
                         @endphp
-                        <a href="{{ $it['to'] }}" class="px-3 py-2 text-sm font-semibold rounded-lg transition-colors {{ $active ? 'text-brand-700' : 'text-brand-950 hover:text-brand-700' }}" data-testid="nav-{{ strtolower($it['label']) }}">
+                        <a href="{{ $it['to'] }}" class="px-3 py-2 text-sm font-semibold rounded-lg transition-colors {{ $it['label'] === 'PPDB' ? ($active ? 'text-accent-700' : 'text-brand-950 hover:text-accent-700') : ($active ? 'text-brand-700' : 'text-brand-950 hover:text-brand-700') }}" data-testid="nav-{{ strtolower($it['label']) }}">
                             {{ $it['label'] }}
                         </a>
                     @endif
@@ -95,7 +95,7 @@
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
                     </a>
                 @else
-                    <a href="/login" data-testid="nav-login-btn" class="inline-flex items-center gap-2 rounded-full gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-brand-900/20 transition">
+                    <a href="/login" data-testid="nav-login-btn" class="inline-flex items-center gap-2 rounded-full gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-brand-900/20 transition ring-2 ring-accent-200/40">
                         <i data-lucide="log-in" class="w-4 h-4"></i> Masuk
                     </a>
                 @endauth

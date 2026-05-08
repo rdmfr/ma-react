@@ -28,6 +28,11 @@
                                 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857',
                                 800: '#065f46', 900: '#064e3b', 950: '#022c22',
                             },
+                            accent: {
+                                50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74',
+                                400: '#fb923c', 500: '#f97316', 600: '#ea580c', 700: '#c2410c',
+                                800: '#9a3412', 900: '#7c2d12', 950: '#431407',
+                            },
                         }
                     }
                 }
@@ -47,6 +52,8 @@
                 --brand-light: #10b981;
                 --brand-lighter: #34d399;
                 --brand-soft: #d1fae5;
+                --accent: #f97316;
+                --accent-soft: #ffedd5;
                 --ink: #022c22;
                 --body: #334155;
                 --muted: #64748b;
@@ -66,8 +73,16 @@
             .font-editorial { font-family: 'Fraunces', serif; }
             .gradient-brand { background-image: linear-gradient(135deg, #064e3b 0%, #10b981 100%); }
             .gradient-brand-hover:hover { background-image: linear-gradient(135deg, #047857 0%, #34d399 100%); }
+            .gradient-accent { background-image: linear-gradient(135deg, #c2410c 0%, #f97316 100%); }
+            .gradient-accent-hover:hover { background-image: linear-gradient(135deg, #ea580c 0%, #fb923c 100%); }
             .gradient-text {
                 background-image: linear-gradient(135deg, #064e3b 0%, #10b981 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+            .gradient-text-accent {
+                background-image: linear-gradient(135deg, #c2410c 0%, #f97316 100%);
                 -webkit-background-clip: text;
                 background-clip: text;
                 color: transparent;
