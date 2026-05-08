@@ -91,9 +91,15 @@
                     <i data-lucide="search" class="w-4 h-4"></i>
                 </button>
                 @auth
-                    <a href="/{{ auth()->user()->role }}" data-testid="nav-login-btn" class="inline-flex items-center gap-2 rounded-full gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-brand-900/20 transition">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
-                    </a>
+                    @if (session('dashboard_return_url'))
+                        <a href="{{ route('go.dashboard') }}" data-testid="nav-back-dashboard-btn" class="inline-flex items-center gap-2 rounded-full gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-brand-900/20 transition">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Dashboard
+                        </a>
+                    @else
+                        <a href="/{{ auth()->user()->role }}" data-testid="nav-dashboard-btn" class="inline-flex items-center gap-2 rounded-full gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-brand-900/20 transition">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+                        </a>
+                    @endif
                 @else
                     <a href="/login" data-testid="nav-login-btn" class="inline-flex items-center gap-2 rounded-full gradient-brand gradient-brand-hover text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-brand-900/20 transition ring-2 ring-accent-200/40">
                         <i data-lucide="log-in" class="w-4 h-4"></i> Masuk

@@ -133,6 +133,9 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
+                    <a href="{{ route('go.public') }}" class="inline-flex items-center gap-2 rounded-xl bg-white border border-brand-100 px-4 py-2.5 text-sm font-bold text-brand-900 hover:bg-brand-50 transition" data-testid="go-public-btn">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> <span class="hidden sm:inline">Lihat Website</span>
+                    </a>
                     <div class="flex items-center gap-3 rounded-xl bg-white border border-brand-100 px-3 py-2">
                         <div class="w-8 h-8 rounded-full bg-brand-100 overflow-hidden">
                             <img src="{{ auth()->user()->avatar_url ?? 'https://i.pravatar.cc/120?u=' . urlencode((string) (auth()->user()->email ?? '')) }}" alt="" class="w-full h-full object-cover">
@@ -164,4 +167,3 @@
         </div>
     </div>
 @endsection
-

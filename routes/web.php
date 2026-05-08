@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\PublicController;
 use App\Http\Controllers\Web\PublicFormController;
@@ -69,6 +70,30 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/go-public', function () {
+        $prev = (string) url()->previous();
+        if ($prev !== '' && str_starts_with($prev, url('/'))) {
+            session(['dashboard_return_url' => $prev]);
+        }
+        return redirect()->route('home');
+    })->name('go.public');
+
+    Route::get('/go-dashboard', function (Request $request) {
+        $role = (string) ($request->user()?->role ?? '');
+        $fallback = $role !== '' ? '/' . ltrim($role, '/') : '/';
+
+        $to = session('dashboard_return_url');
+        session()->forget('dashboard_return_url');
+
+        if (is_string($to) && $to !== '' && str_starts_with($to, url('/'))) {
+            return redirect()->to($to);
+        }
+
+        return redirect($fallback);
+    })->name('go.dashboard');
+});
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', AdminDashboardController::class)->name('admin.home');
