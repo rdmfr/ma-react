@@ -136,24 +136,48 @@ class PublicController extends Controller
     {
         $q = trim((string) $request->query('q', ''));
         $sub = (string) $request->query('sub', 'Semua');
+        $cat = (string) $request->query('cat', 'Semua');
 
         $visible = $this->fetchRecords('teachers');
         $subjects = $visible
-            ->map(fn ($t) => is_array($t) ? ($t['subject'] ?? null) : null)
+            ->flatMap(function ($t) {
+                if (!is_array($t)) return [];
+                $arr = $t['subjects'] ?? null;
+                if (is_array($arr) && count($arr) > 0) return $arr;
+                $s = $t['subject'] ?? null;
+                return is_string($s) && trim($s) !== '' ? [$s] : [];
+            })
             ->filter(fn ($s) => is_string($s) && trim($s) !== '')
             ->unique()
             ->sort()
             ->values();
 
+        $categories = $visible
+            ->map(fn ($t) => is_array($t) ? ($t['category'] ?? null) : null)
+            ->filter(fn ($c) => is_string($c) && trim($c) !== '')
+            ->unique()
+            ->sort()
+            ->values();
+
         $filtered = $visible
-            ->filter(function ($t) use ($q, $sub) {
+            ->filter(function ($t) use ($q, $sub, $cat) {
                 if (!is_array($t)) return false;
-                if ($sub !== 'Semua' && ($t['subject'] ?? null) !== $sub) return false;
+                if ($cat !== 'Semua' && (string) ($t['category'] ?? '') !== $cat) return false;
+                if ($sub !== 'Semua') {
+                    $arr = $t['subjects'] ?? null;
+                    if (is_array($arr) && count($arr) > 0) {
+                        if (!in_array($sub, $arr, true)) return false;
+                    } else {
+                        if (($t['subject'] ?? null) !== $sub) return false;
+                    }
+                }
                 if ($q === '') return true;
                 $name = strtolower((string) ($t['name'] ?? ''));
                 $subject = strtolower((string) ($t['subject'] ?? ''));
+                $pos = strtolower((string) ($t['position'] ?? ''));
+                $category = strtolower((string) ($t['category'] ?? ''));
                 $needle = strtolower($q);
-                return str_contains($name, $needle) || str_contains($subject, $needle);
+                return str_contains($name, $needle) || str_contains($subject, $needle) || str_contains($pos, $needle) || str_contains($category, $needle);
             })
             ->values();
 
@@ -161,7 +185,9 @@ class PublicController extends Controller
             'teachers' => $filtered,
             'q' => $q,
             'sub' => $sub,
+            'cat' => $cat,
             'subjects' => $subjects,
+            'categories' => $categories,
         ]);
     }
 

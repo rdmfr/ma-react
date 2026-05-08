@@ -47,9 +47,17 @@ class AdminRecordCrudController extends Controller
         }
 
         $p = $query->paginate(20)->withQueryString();
-        $rows = collect($p->items())->map(function (Record $r) {
+        $rows = collect($p->items())->map(function (Record $r) use ($type) {
             $data = is_array($r->data) ? $r->data : [];
-            return array_merge(['id' => $r->id, 'created_at' => $r->created_at, 'updated_at' => $r->updated_at], $data);
+            $row = array_merge(['id' => $r->id, 'created_at' => $r->created_at, 'updated_at' => $r->updated_at], $data);
+            if ($type === 'teachers') {
+                $subjects = $row['subjects'] ?? null;
+                if (!is_array($subjects) || count($subjects) === 0) {
+                    $s = $row['subject'] ?? null;
+                    $row['subjects'] = is_string($s) && trim($s) !== '' ? [$s] : [];
+                }
+            }
+            return $row;
         })->values();
 
         $page = new LengthAwarePaginator($rows, $p->total(), $p->perPage(), $p->currentPage(), [
@@ -332,15 +340,23 @@ class AdminRecordCrudController extends Controller
                 'title' => 'Manajemen Guru',
                 'description' => 'Kelola data guru & staff.',
                 'icon' => 'graduation-cap',
-                'search' => ['name', 'subject'],
+                'search' => ['name', 'subject', 'category', 'position'],
                 'table' => [
                     ['key' => 'name', 'label' => 'Nama'],
-                    ['key' => 'subject', 'label' => 'Mata Pelajaran'],
+                    ['key' => 'category', 'label' => 'Kategori'],
+                    ['key' => 'position', 'label' => 'Jabatan'],
+                    ['key' => 'subjects', 'label' => 'Mapel'],
                     ['key' => 'status', 'label' => 'Status', 'badge' => ['approved' => 'emerald', 'pending' => 'amber', 'draft' => 'slate']],
                 ],
                 'fields' => [
                     ['key' => 'name', 'label' => 'Nama', 'input' => 'text', 'required' => true],
                     ['key' => 'slug', 'label' => 'Slug', 'input' => 'text', 'required' => true],
+                    ['key' => 'category', 'label' => 'Kategori', 'input' => 'select', 'options' => [
+                        ['value' => 'Pengurus', 'label' => 'Pengurus'],
+                        ['value' => 'Guru', 'label' => 'Guru'],
+                        ['value' => 'Staf', 'label' => 'Staf'],
+                    ]],
+                    ['key' => 'position', 'label' => 'Jabatan', 'input' => 'text'],
                     ['key' => 'subject', 'label' => 'Mata Pelajaran', 'input' => 'text', 'required' => true],
                     ['key' => 'photo', 'label' => 'Foto', 'input' => 'image'],
                     ['key' => 'bio', 'label' => 'Bio Singkat', 'input' => 'textarea'],

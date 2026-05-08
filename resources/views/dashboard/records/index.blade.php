@@ -123,7 +123,11 @@
                                 <option value="">Semua</option>
                                 @if (is_array($opt))
                                     @foreach ($opt as $o)
-                                        <option value="{{ $o['value'] ?? '' }}" @selected((string) ($o['value'] ?? '') === $current)>{{ $o['label'] ?? ($o['value'] ?? '') }}</option>
+                                        @php
+                                            $ov = is_array($o) ? (string) ($o['value'] ?? '') : (string) $o;
+                                            $ol = is_array($o) ? (string) ($o['label'] ?? ($o['value'] ?? '')) : (string) $o;
+                                        @endphp
+                                        <option value="{{ $ov }}" @selected($ov === $current)>{{ $ol }}</option>
                                     @endforeach
                                 @endif
                             </select>
@@ -132,11 +136,14 @@
                 </form>
             </div>
 
+            @php
+                $cols = $module['columns'] ?? ($module['table'] ?? []);
+            @endphp
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead>
                         <tr class="bg-slate-50 text-slate-600">
-                            @foreach (($module['columns'] ?? []) as $col)
+                            @foreach ($cols as $col)
                                 <th class="text-left font-bold px-5 py-3 whitespace-nowrap">{{ $col['label'] ?? $col['key'] }}</th>
                             @endforeach
                             <th class="text-right font-bold px-5 py-3 whitespace-nowrap">Aksi</th>
@@ -145,10 +152,16 @@
                     <tbody class="divide-y divide-slate-100">
                         @foreach ($rows as $r)
                             <tr class="hover:bg-brand-50/30" data-testid="record-row-{{ $r['id'] }}">
-                                @foreach (($module['columns'] ?? []) as $col)
+                                @foreach ($cols as $col)
                                     @php
                                         $v = $r[$col['key']] ?? '';
-                                        $vs = is_scalar($v) ? (string) $v : '';
+                                        if (is_array($v)) {
+                                            $vs = implode(', ', array_values(array_filter($v, fn ($x) => is_scalar($x) && trim((string) $x) !== '')));
+                                        } elseif (is_bool($v)) {
+                                            $vs = $v ? 'true' : 'false';
+                                        } else {
+                                            $vs = is_scalar($v) ? (string) $v : '';
+                                        }
                                         $isImg = is_string($vs) && preg_match('/\.(png|jpg|jpeg|webp|gif)(\?.*)?$/i', $vs);
                                     @endphp
                                     <td class="px-5 py-4 text-slate-700 max-w-[360px]">
@@ -169,7 +182,7 @@
                         @endforeach
                         @if ($rows->count() === 0)
                             <tr>
-                                <td colspan="{{ count($module['columns'] ?? []) + 1 }}" class="px-5 py-10 text-center text-slate-500">Belum ada data.</td>
+                                <td colspan="{{ count($cols) + 1 }}" class="px-5 py-10 text-center text-slate-500">Belum ada data.</td>
                             </tr>
                         @endif
                     </tbody>

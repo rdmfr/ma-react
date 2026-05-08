@@ -7,6 +7,7 @@ use App\Models\Record;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * Database Seeder - Idempotent for Production
@@ -187,13 +188,65 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($staff as $i => $t) {
-            $slug = strtolower(preg_replace('/[^a-z0-9\s-]/i', '', $t['name']));
-            $slug = trim(preg_replace('/\s+/', '-', $slug));
-            $slug = preg_replace('/-+/', '-', $slug);
+            $slug = Str::slug($t['name']);
+
+            $raw = (string) ($t['subject'] ?? '');
+            $lower = strtolower($raw);
+
+            $category = 'Guru';
+            if (str_contains($lower, 'tata usaha') || str_contains($lower, 'operator') || str_contains($lower, 'pegawai umum')) {
+                $category = 'Staf';
+            } elseif (
+                str_contains($lower, 'ketua yayasan') ||
+                str_contains($lower, 'kepala sekolah') ||
+                str_contains($lower, 'wakasek') ||
+                str_contains($lower, 'bendahara')
+            ) {
+                $category = 'Pengurus';
+            }
+
+            $parts = array_values(array_filter(array_map('trim', explode('/', $raw)), fn ($p) => $p !== ''));
+            $position = '';
+            $subjectText = $raw;
+            if (count($parts) >= 2) {
+                $first = strtolower($parts[0]);
+                if (
+                    str_contains($first, 'ketua yayasan') ||
+                    str_contains($first, 'kepala sekolah') ||
+                    str_contains($first, 'wakasek') ||
+                    str_contains($first, 'bendahara') ||
+                    str_contains($first, 'tata usaha') ||
+                    str_contains($first, 'operator') ||
+                    str_contains($first, 'pegawai umum')
+                ) {
+                    $position = $parts[0];
+                    $subjectText = implode(' / ', array_slice($parts, 1));
+                }
+            }
+
+            $subjects = collect(explode('/', $subjectText))
+                ->flatMap(function ($chunk) {
+                    $chunk = trim((string) $chunk);
+                    if ($chunk === '') return [];
+                    $chunk = preg_replace('/\s+/', ' ', $chunk);
+                    $chunk = str_replace([' dan ', ' & '], '&', $chunk);
+                    return collect(explode('&', $chunk))
+                        ->map(fn ($s) => trim((string) $s))
+                        ->filter(fn ($s) => $s !== '')
+                        ->values()
+                        ->all();
+                })
+                ->unique()
+                ->values()
+                ->all();
+
             $this->seedRecord($t['id'], 'teachers', [
                 'id' => $t['id'],
                 'name' => $t['name'],
-                'subject' => $t['subject'],
+                'subject' => $raw,
+                'category' => $category,
+                'position' => $position,
+                'subjects' => $subjects,
                 'slug' => $slug,
                 'photo' => '',
                 'bio' => '',

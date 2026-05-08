@@ -14,10 +14,16 @@
                 @if (!empty($sub) && $sub !== 'Semua')
                     <input type="hidden" name="sub" value="{{ $sub }}">
                 @endif
+                @if (!empty($cat) && $cat !== 'Semua')
+                    <input type="hidden" name="cat" value="{{ $cat }}">
+                @endif
             </form>
             <form method="GET" action="/guru">
                 @if (!empty($q))
                     <input type="hidden" name="q" value="{{ $q }}">
+                @endif
+                @if (!empty($cat) && $cat !== 'Semua')
+                    <input type="hidden" name="cat" value="{{ $cat }}">
                 @endif
                 <select name="sub" onchange="this.form.submit()" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium outline-none focus:border-brand-500" data-testid="guru-filter">
                     <option {{ ($sub ?? 'Semua') === 'Semua' ? 'selected' : '' }}>Semua</option>
@@ -26,11 +32,29 @@
                     @endforeach
                 </select>
             </form>
+            <form method="GET" action="/guru">
+                @if (!empty($q))
+                    <input type="hidden" name="q" value="{{ $q }}">
+                @endif
+                @if (!empty($sub) && $sub !== 'Semua')
+                    <input type="hidden" name="sub" value="{{ $sub }}">
+                @endif
+                <select name="cat" onchange="this.form.submit()" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium outline-none focus:border-brand-500" data-testid="guru-category-filter">
+                    <option {{ ($cat ?? 'Semua') === 'Semua' ? 'selected' : '' }}>Semua</option>
+                    @foreach ($categories as $c)
+                        <option value="{{ $c }}" {{ ($cat ?? 'Semua') === $c ? 'selected' : '' }}>{{ $c }}</option>
+                    @endforeach
+                </select>
+            </form>
         </div>
         <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @foreach ($teachers as $t)
                 @php
                     $photo = ($t['photo'] ?? null) ?: ('https://i.pravatar.cc/600?u=' . urlencode((string) (($t['slug'] ?? ($t['name'] ?? ($t['id'] ?? ''))))));
+                    $category = (string) ($t['category'] ?? '');
+                    $position = (string) ($t['position'] ?? '');
+                    $subjects = $t['subjects'] ?? null;
+                    $subjectsLine = is_array($subjects) && count($subjects) > 0 ? implode(', ', $subjects) : ((string) ($t['subject'] ?? ''));
                 @endphp
                 <a href="/guru/{{ $t['slug'] ?? ($t['id'] ?? '') }}" class="group" data-testid="guru-card-{{ $t['id'] ?? '' }}">
                     <div class="aspect-[3/4] rounded-3xl overflow-hidden relative bg-brand-100">
@@ -41,8 +65,16 @@
                                 <i data-lucide="star" class="w-3 h-3 fill-amber-500 text-amber-500"></i> Unggulan
                             </div>
                         @endif
+                        @if ($category !== '')
+                            <div class="absolute top-3 left-3 bg-black/30 backdrop-blur rounded-full px-2.5 py-1 text-[10px] font-bold text-white inline-flex items-center gap-1 border border-white/15">
+                                {{ $category }}
+                            </div>
+                        @endif
                         <div class="absolute bottom-4 left-4 right-4 text-white">
-                            <div class="text-[10px] uppercase tracking-[0.2em] text-brand-300 font-bold">{{ $t['subject'] ?? '' }}</div>
+                            <div class="text-[10px] uppercase tracking-[0.2em] text-brand-200 font-bold">{{ $position !== '' ? $position : $subjectsLine }}</div>
+                            @if ($position !== '' && $subjectsLine !== '')
+                                <div class="text-[11px] text-white/85 mt-1 line-clamp-1">{{ $subjectsLine }}</div>
+                            @endif
                             <div class="font-display font-bold text-lg leading-tight mt-1">{{ $t['name'] ?? '' }}</div>
                         </div>
                     </div>
@@ -54,4 +86,3 @@
         @endif
     </div>
 @endsection
-
